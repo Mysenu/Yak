@@ -19,9 +19,27 @@ class ScanDirection:
     Right = 0b01
 
 
+class SubExpression:
+    def __init__(self):
+        self.subexpression_location = ()
+        self.part_expression = ()
+
+    def addLocation(self, value):
+        if not value:
+            return
+
+        self.subexpression_location = value
+
+    def addPart(self, value):
+        if not value:
+            return
+
+        self.part_expression = value
+
+
 def findExpressionPart(expr: str,
                        start: int,
-                       direction: int = ScanDirection.Right) -> Optional[dict]:
+                       direction: int = ScanDirection.Right):
     if not expr:
         return
 
@@ -64,23 +82,23 @@ def findExpressionPart(expr: str,
         part = expr[start - rel_end_pos + 1:start + 1]
         expr_section = [start - rel_end_pos + 1, start + 1]
 
-    return {
-        'expr': part,
-        'expr_section': expr_section
-    }
+    part_expr = SubExpression()
+    part_expr.addLocation(expr_section)
+    part_expr.addPart(part)
+    return part_expr
 
 
-def findExpressionParts(expr: str, index: int) -> dict:
+def findExpressionParts(expr: str, index: int):
     left_part = findExpressionPart(expr, index, ScanDirection.Left)
-    start, _ = left_part['expr_section']
+    start, _ = left_part.subexpression_location
 
     right_part = findExpressionPart(expr, index, ScanDirection.Right)
-    _, end = right_part['expr_section']
+    _, end = right_part.subexpression_location
 
-    return {
-        'expr_section': (start, end),
-        'expr': expr[start:end]
-    }
+    subexpression = SubExpression
+    subexpression.subexpression_location = start, end
+    subexpression.part_expression = left_part.part_expression, right_part.part_expression
+    return subexpression
 
 
 def convertToPyExpr(r_expr: str) -> str:
@@ -166,6 +184,6 @@ if __name__ == '__main__':
     # print(findPartExpression('2+344^4+√4233', 5, ScanDirection.Left), '|||', '2+(344^4)+√4233')
     # print(findExpressionPart('2+(344^4)+√4233', 6, ScanDirection.Left), '|||', '2+(344^4)+√4233')
     # print(findPartExpression('2+(344^4)+√4233', 10, ScanDirection.Right), '|||', '2+(344^4)+√4233')
-    # print(findExpressionPart('2+(344^4)+(√4233)', 11, ScanDirection.Right), '|||', '2+(344^4)+√4233')
     # print(findExpressionParts('22^32+2(23^34)2+42^33', 10))
-    print(isExpression(''))
+    sub = findExpressionPart('22^32+√(2234+23)+42^33', 6)
+    print(sub.part_expression, sub.subexpression_location)
