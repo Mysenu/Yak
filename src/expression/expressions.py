@@ -1,4 +1,5 @@
 from typing import Optional, Union, Tuple
+from enum import IntEnum
 
 
 def prepareExpression(expression: str, change_math_char=False) -> str:
@@ -14,9 +15,9 @@ def prepareExpression(expression: str, change_math_char=False) -> str:
     return converted_expression
 
 
-class ScanDirection:
-    Left = 0b10
-    Right = 0b01
+class ScanDirection(IntEnum):
+    Left = 1
+    Right = 2
 
 
 class SubExpression:
@@ -51,12 +52,11 @@ class SubExpression:
         self.__range = (min(start, range[0]), max(end, range[1]))
 
     def __add__(self, subexpr):
-        new = SubExpressions((self.__range, subexpr.__range),
-                             (self.subexpr, subexpr.subexpr))
-        return new
+        return SubExpressions((self.__range, subexpr.__range), (self.subexpr, subexpr.subexpr))
 
 
 class SubExpressions:
+    """Implementation of the multiple-contained subexpression with common and divided range."""
     def __init__(self, ranges: Tuple = None,
                  subexprs: Tuple[str, str] = None) -> None:
         self.__ranges = ranges
@@ -65,6 +65,11 @@ class SubExpressions:
     @property
     def ranges(self) -> Tuple[Tuple[int, int]]:
         return self.__ranges
+
+    @property
+    def range(self) -> Tuple[int, int]:
+        first_range, second_range = self.__ranges
+        return min(first_range[0], second_range[0]), max(first_range[1], second_range[1])
 
     @property
     def subexprs(self) -> Tuple[str, str]:
@@ -86,7 +91,7 @@ class SubExpressions:
 
 def findExpressionPart(expr: str,
                        start: int,
-                       direction: int = ScanDirection.Right):
+                       direction: int = ScanDirection.Right) -> Union[SubExpression, None]:
     if not expr:
         return
 
@@ -123,29 +128,15 @@ def findExpressionPart(expr: str,
         else:
             rel_end_pos = len(part_expr)
     if direction == ScanDirection.Right:
-        part = expr[start:start + rel_end_pos]
-        expr_section = [start, start + rel_end_pos]
+        return SubExpression((start, start + rel_end_pos), expr)
     else:
-        part = expr[start - rel_end_pos + 1:start + 1]
-        expr_section = [start - rel_end_pos + 1, start + 1]
-
-    part_expr = SubExpression()
-    part_expr.addLocation(expr_section)
-    part_expr.addPart(part)
-    return part_expr
+        return SubExpression((start - rel_end_pos + 1, start + 1), expr)
 
 
-def findExpressionParts(expr: str, index: int):
+def findExpressionParts(expr: str, index: int) -> SubExpressions:
     left_part = findExpressionPart(expr, index, ScanDirection.Left)
-    start, _ = left_part.subexpression_location
-
     right_part = findExpressionPart(expr, index, ScanDirection.Right)
-    _, end = right_part.subexpression_location
-
-    subexpression = SubExpression
-    subexpression.subexpression_location = start, end
-    subexpression.part_expression = left_part.part_expression, right_part.part_expression
-    return subexpression
+    return left_part + right_part
 
 
 def convertToPyExpr(r_expr: str) -> str:
@@ -224,8 +215,5 @@ def canBeAdded(char: str, expression: str, position: int) -> bool:
 
 
 if __name__ == '__main__':
-    test = SubExpression((0, 1), '2^3+√(2234+23)+42^33')
-    test2 = SubExpression((2, 3), '2^3+√(2234+23)+42^33')
-    print(test2)
-    test3 = test + test2
-    print(eval(f'pow({str(test3)})'))
+    new = findExpressionParts('12^44+36*7', 2)
+    print(eval(str(f'pow({new})')))
