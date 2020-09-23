@@ -50,6 +50,39 @@ class SubExpression:
         start, end = self.__range
         self.__range = (min(start, range[0]), max(end, range[1]))
 
+    def __add__(self, subexpr):
+        new = SubExpressions((self.__range, subexpr.__range),
+                             (self.subexpr, subexpr.subexpr))
+        return new
+
+
+class SubExpressions:
+    def __init__(self, ranges: Tuple = None,
+                 subexprs: Tuple[str, str] = None) -> None:
+        self.__ranges = ranges
+        self.__subexprs = subexprs
+
+    @property
+    def ranges(self) -> Tuple[Tuple[int, int]]:
+        return self.__ranges
+
+    @property
+    def subexprs(self) -> Tuple[str, str]:
+        return self.__subexprs
+
+    @property
+    def start(self) -> int:
+        first_range, second_range = self.__ranges
+        return min(first_range[0], second_range[0])
+
+    @property
+    def end(self) -> int:
+        first_range, second_range = self.__ranges
+        return max(first_range[1], second_range[1])
+
+    def __str__(self) -> str:
+        return ', '.join(self.__subexprs)
+
 
 def findExpressionPart(expr: str,
                        start: int,
@@ -191,8 +224,8 @@ def canBeAdded(char: str, expression: str, position: int) -> bool:
 
 
 if __name__ == '__main__':
-    test = SubExpression((0, 2), '22^32+√(2234+23)+42^33')
-    test2 = SubExpression((3, 5), '22^32+√(2234+23)+42^33')
-    print(str(test2))
+    test = SubExpression((0, 1), '2^3+√(2234+23)+42^33')
+    test2 = SubExpression((2, 3), '2^3+√(2234+23)+42^33')
+    print(test2)
     test3 = test + test2
-    print(str(test3))
+    print(eval(f'pow({str(test3)})'))
