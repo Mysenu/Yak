@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 
 def prepareExpression(expression: str, change_math_char=False) -> str:
@@ -20,58 +20,35 @@ class ScanDirection:
 
 
 class SubExpression:
-    def __init__(self, range: tuple = (0, 0), expr: str = ''):
+    """Implementation of the single-contained subexpression."""
+    def __init__(self, range: tuple = (0, 0), expr: str = '') -> None:
         self.__range = range
         self.__expr = expr
-        self.__subexpr = None
 
     @property
-    def range(self):
+    def range(self) -> Tuple[int, int]:
         return self.__range
 
     @property
-    def expr(self):
+    def expr(self) -> str:
         return self.__expr
 
     @property
-    def start(self):
+    def start(self) -> int:
         return self.__range[0]
 
     @property
-    def lastIndex(self):
+    def end(self) -> int:
         return self.__range[1]
 
     @property
-    def subexpr(self):
-        if self.__subexpr:
-            return self.__subexpr
+    def subexpr(self) -> str:
+        start, end = self.__range
+        return self.__expr[start:end]
 
-        return self.__expr[self.start:self.lastIndex]
-
-    def addRange(self, values: tuple):
-        for value in values:
-            self.__range = (min(self.start, value), max(self.lastIndex, value))
-
-    def __add__(self, other):
-        new = SubExpression(expr=self.expr)
-        start, last_index = self.start, self.lastIndex
-        other_start, other_last_index = other.start, other.lastIndex
-
-        if start > other_start:
-            new.__subexpr = self.subexpr, other.subexpr
-        else:
-            new.__subexpr = other.subexpr, self.subexpr
-
-        new.addRange((start, last_index, other_start, other_last_index))
-
-        return new
-
-    # def __str__(self):
-    #     all_subexpr = []
-    #     print(self.subexpr)
-    #     for subexpr in self.subexpr:
-    #         all_subexpr.append(subexpr)
-    #     return f'({", ".join(all_subexpr)})'
+    def addRange(self, range: tuple) -> None:
+        start, end = self.__range
+        self.__range = (min(start, range[0]), max(end, range[1]))
 
 
 def findExpressionPart(expr: str,
@@ -216,6 +193,6 @@ def canBeAdded(char: str, expression: str, position: int) -> bool:
 if __name__ == '__main__':
     test = SubExpression((0, 2), '22^32+√(2234+23)+42^33')
     test2 = SubExpression((3, 5), '22^32+√(2234+23)+42^33')
+    print(str(test2))
     test3 = test + test2
     print(str(test3))
-    print(str(test2))
