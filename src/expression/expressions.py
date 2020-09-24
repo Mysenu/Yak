@@ -1,17 +1,10 @@
 from typing import Optional, Union, Tuple
 from enum import IntEnum
+from math import sqrt, pow
 
 
 def prepareExpression(expression: str, change_math_char=False) -> str:
-    invalid_characters = '+-/*.√^% '
-
-    expression = expression.rstrip('/*-+. ')
-
-    if not change_math_char:
-        return expression
-
     converted_expression = convertToPyExpr(expression)
-
     return converted_expression
 
 
@@ -54,6 +47,9 @@ class SubExpression:
     def __add__(self, subexpr):
         return SubExpressions((self.__range, subexpr.__range), (self.subexpr, subexpr.subexpr))
 
+    def __str__(self):
+        return f'{self.subexpr}'
+
 
 class SubExpressions:
     """Implementation of the multiple-contained subexpression with common and divided range."""
@@ -85,28 +81,38 @@ class SubExpressions:
         first_range, second_range = self.__ranges
         return max(first_range[1], second_range[1])
 
+    def __len__(self) -> int:
+        return len(self.__subexprs)
+
+    def __getitem__(self, item: int) -> str:
+        return self.__subexprs[item]
+
     def __str__(self) -> str:
         return ', '.join(self.__subexprs)
 
 
 def findExpressionPart(expr: str,
-                       start: int,
+                       index: int,
                        direction: int = ScanDirection.Right) -> Union[SubExpression, None]:
+    """
+    Finds the range of a subexpression at the specified index and
+    direction, and returns an object of the Subexpression class.
+    """
     if not expr:
         return
 
     if direction == ScanDirection.Right:
-        start += 1
-        part_expr = expr[start:]
+        index += 1
+        part_expr = expr[index:]
         open_bracket = '('
         close_bracket = ')'
     else:  # pos_expr == ScanDirection.Left:
-        start -= 1
-        part_expr = expr[:start + 1][::-1]
+        index -= 1
+        part_expr = expr[:index + 1][::-1]
         open_bracket = ')'
         close_bracket = '('
 
-    src_char = expr[start]
+    src_char = expr[index]
     if src_char == '(' or src_char == ')':
         bracket_count = 0
         for rel_pos, char in enumerate(part_expr):
@@ -122,15 +128,15 @@ def findExpressionPart(expr: str,
             rel_end_pos = len(part_expr)
     else:
         for rel_pos, char in enumerate(part_expr):
-            if not char.isdigit() and char != '.':
+            if not char.isdigit() and char != '.' and char != '√':
                 rel_end_pos = rel_pos
                 break
         else:
             rel_end_pos = len(part_expr)
     if direction == ScanDirection.Right:
-        return SubExpression((start, start + rel_end_pos), expr)
+        return SubExpression((index, index + rel_end_pos), expr)
     else:
-        return SubExpression((start - rel_end_pos + 1, start + 1), expr)
+        return SubExpression((index - rel_end_pos + 1, index + 1), expr)
 
 
 def findExpressionParts(expr: str, index: int) -> SubExpressions:
@@ -139,20 +145,24 @@ def findExpressionParts(expr: str, index: int) -> SubExpressions:
     return left_part + right_part
 
 
-def convertToPyExpr(r_expr: str) -> str:
-    math_char = '+-/*^'
-
-    r_expr = r_expr.replace(' ', '')
-
-    for index, char in enumerate(r_expr):
+def convertToPyExpr(raw_expr: str) -> str:
+    math = ''
+    for index, char in enumerate(raw_expr):
         if char == '√':
-            dict_expr = findExpressionPart(r_expr, index, ScanDirection.Right)
-            start, end = dict_expr['expr_section']
-            part_expr = ''.join(dict_expr['expr'])
-            expr = f'{r_expr[:start - 1]}sqrt({part_expr}){r_expr[end:]}'
+            math = 'sqrt'
+            sub_expr = findExpressionPart(raw_expr, index)
+            start, end = sub_expr.start - 1, sub_expr.end
+
+        if char == '^':
+            math = 'pow'
+            sub_expr = findExpressionParts(raw_expr, index)
+            start, end = sub_expr.start, sub_expr.end
+
+        if math:
+            expr = f'{raw_expr[:start]}{math}({str(sub_expr)}){raw_expr[end:]}'
             return convertToPyExpr(expr)
     else:
-        return r_expr
+        return raw_expr
 
 
 def isExpression(text: str) -> bool:
@@ -191,6 +201,7 @@ def isIdenticalExpressions(expr1: str, expr2: str) -> bool:
 def calculate(expression: str) -> Optional[Union[int, float, bool]]:
     if expression.strip():
         expression = prepareExpression(expression, True)
+        print(expression)
         return eval(expression)
 
 
@@ -215,5 +226,5 @@ def canBeAdded(char: str, expression: str, position: int) -> bool:
 
 
 if __name__ == '__main__':
-    new = findExpressionParts('12^44+36*7', 2)
-    print(eval(str(f'pow({new})')))
+    print(calculate('(11-8)^(3-1)'))
+    print(calculate('√(45+4)'))
