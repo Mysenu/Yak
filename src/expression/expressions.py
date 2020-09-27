@@ -50,8 +50,8 @@ class SubExpression:
 class SubExpressions:
     """The class is implemented as an object for ease of working with subexpressions and their ranges."""
     def __init__(self, range_1: tuple, range_2: tuple, subexpr_1: str, subexpr_2: str) -> None:
-        self.__subexprs = subexpr_1, subexpr_2
         self.__range = min(range_1[0], range_2[0]), max(range_1[1], range_2[1])
+        self.__subexprs = subexpr_1, subexpr_2
 
     @property
     def range(self) -> Tuple[int, int]:
@@ -104,10 +104,10 @@ def findExpressionPart(expr: str,
                 bracket_count -= 1
 
             if bracket_count == 0:
-                rel_end_pos = rel_pos + 1
+                rel_end_pos = rel_pos
                 break
         else:
-            rel_end_pos = len(part_expr)
+            rel_end_pos = len(part_expr) - 1
     else:
         for rel_pos, char in enumerate(part_expr):
             if not char.isdigit() and char != '.' and char != '√':
@@ -121,7 +121,7 @@ def findExpressionPart(expr: str,
     else:
         index += 1
         sub_range = index - rel_end_pos, index
-
+    print(expr[sub_range[0]:sub_range[1]])
     return SubExpression(sub_range, expr)
 
 
@@ -158,72 +158,85 @@ def convertToPyExpr(raw_expr: str) -> str:
         return raw_expr
 
 
-# def isExpression(expression: str) -> bool:
-#     first_math_char = '+-*/^'
-#     second_math_char = '%√'
-#     is_expression = False
-#     math_char = False
-#     point = False
-#     for index, char in enumerate(expression):
-#         if (char in first_math_char or char in second_math_char) and index == 0:  # исключаем +/- числа
-#             continue
-#
-#         if char.isdigit() and math_char:
-#             is_expression = True
-#             continue
-#
-#         if char.isdigit():
-#             continue
-#
-#         if len(expression) == index + 1 and math_char:
-#             is_expression = False
-#             break
-#
-#         if char == '.' and point:
-#             is_expression = False
-#             break
-#
-#         if char == '.':
-#             point = True
-#
-#     else:
-#         if not is_expression:
-#             return False
-#         return True
+def isExpression(text: str) -> bool:
+    LEFT_UNARY_OPS = '-+√'
+    RIGHT_UNARY_OPS = '%'
+    BINARY_OPS = '+-*/^'
 
+    if not text:
+        return False
 
-def isIdenticalExpressions(expr1: str, expr2: str) -> bool:
-    return expr1.split(' ') == expr2.split(' ')
+    is_expression = True
+    op_char_found = False  # Todo: Rename
+    dot_found = False
+
+    for index, char in enumerate(text):
+        if index == 0 and char in LEFT_UNARY_OPS:
+            continue
+
+        if char in BINARY_OPS:
+            op_char_found = True
+
+        if op_char_found and char.isdigit():
+            is_expression = True
+            continue
+
+        if char in RIGHT_UNARY_OPS:
+            is_expression = True
+
+        if char.isdigit() or char in '()':
+            continue
+
+        if len(text) == index + 1 and op_char_found:
+            return False
+
+        if char == '.':
+            if dot_found:
+                return False
+            else:
+                dot_found = True
+
+    return is_expression
 
 
 def calculate(expression: str) -> Optional[Union[int, float, bool]]:
     if expression.strip():
         expression = prepareExpression(expression, True)
-        print(expression)
         return eval(expression)
 
 
 def canBeAdded(char: str, expression: str, position: int) -> bool:
     valid_char = '0123456789+-/*.()√^% '
-    start_and_any_quantity = '123456789(+-.√'
-    middle_and_always_one = '%√^/*-+. '
-
-    if position == 0 or not expression:
-        last_char = ''
-    else:
-        last_char = expression[position - 1]
-
-    if not expression and char in start_and_any_quantity:
-        return True
-    elif expression == '0' and char == '0':
-        return False
-    elif last_char in middle_and_always_one and char in middle_and_always_one:
-        return False
-    elif expression and char in valid_char:
-        return True
+    return char in valid_char
 
 
 if __name__ == '__main__':
-    print(calculate('(11-8)^(3-1)'))
-    print(calculate('√(45+4)'))
-    print(calculate('30*45%'))
+    def testExpr(text):
+        print(f'Source: {text} | Py: {convertToPyExpr(text)} | Valid: {isExpression(text)}')
+    # print(calculate('(11-8)^(3-1)'))
+    # print(calculate('√(45+4)'))
+    # print(calculate('30*45%'))
+    # testExpr('√4+23')
+    # testExpr('4+23')
+    # testExpr('4')
+    # testExpr('4+(1+3)')
+    # testExpr('+4')
+    # testExpr('4%')
+    # testExpr('++++4')
+    # testExpr('4++')
+    # testExpr('√4+√4')
+    # testExpr('(-4+5)-3')
+    # testExpr('4+4.4.4')
+    # testExpr('.5+.5')
+    # testExpr('√√4')
+    # testExpr('√(-√4)')
+    # testExpr('4^4')
+    # testExpr('-(4+1)')
+    # testExpr('4.4+4.4')
+    # testExpr('√√')
+    # testExpr('4+4()')
+    # testExpr('')
+    print(convertToPyExpr('√(4+1)%'))
+    print(convertToPyExpr('√4+1%'))
+    print(convertToPyExpr('√(4+1)'))
+    print(convertToPyExpr('4+√5'))
