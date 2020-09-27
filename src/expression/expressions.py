@@ -14,7 +14,7 @@ class ScanDirection(IntEnum):
 
 
 class SubExpression:
-    """Implementation of the single-contained subexpression."""
+    """The class is implemented as an object for ease of working with subexpression and their range."""
     def __init__(self, range: tuple = (0, 0), expr: str = '') -> None:
         self.__range = range
         self.__expr = expr
@@ -40,32 +40,22 @@ class SubExpression:
         start, end = self.__range
         return self.__expr[start:end]
 
-    def addRange(self, range: tuple) -> None:
-        start, end = self.__range
-        self.__range = (min(start, range[0]), max(end, range[1]))
-
-    def __add__(self, subexpr):
-        return SubExpressions((self.__range, subexpr.__range), (self.subexpr, subexpr.subexpr))
+    def __add__(self, other):
+        return SubExpressions(self.__range, other.__range, self.subexpr, other.subexpr)
 
     def __str__(self):
         return f'{self.subexpr}'
 
 
 class SubExpressions:
-    """Implementation of the multiple-contained subexpression with common and divided range."""
-    def __init__(self, ranges: Tuple = None,
-                 subexprs: Tuple[str, str] = None) -> None:
-        self.__ranges = ranges
-        self.__subexprs = subexprs
-
-    @property
-    def ranges(self) -> Tuple[Tuple[int, int]]:
-        return self.__ranges
+    """The class is implemented as an object for ease of working with subexpressions and their ranges."""
+    def __init__(self, range_1: tuple, range_2: tuple, subexpr_1: str, subexpr_2: str) -> None:
+        self.__subexprs = subexpr_1, subexpr_2
+        self.__range = min(range_1[0], range_2[0]), max(range_1[1], range_2[1])
 
     @property
     def range(self) -> Tuple[int, int]:
-        first_range, second_range = self.__ranges
-        return min(first_range[0], second_range[0]), max(first_range[1], second_range[1])
+        return self.__range
 
     @property
     def subexprs(self) -> Tuple[str, str]:
@@ -73,19 +63,11 @@ class SubExpressions:
 
     @property
     def start(self) -> int:
-        first_range, second_range = self.__ranges
-        return min(first_range[0], second_range[0])
+        return self.__range[0]
 
     @property
     def end(self) -> int:
-        first_range, second_range = self.__ranges
-        return max(first_range[1], second_range[1])
-
-    def __len__(self) -> int:
-        return len(self.__subexprs)
-
-    def __getitem__(self, item: int) -> str:
-        return self.__subexprs[item]
+        return self.__range[1]
 
     def __str__(self) -> str:
         return ', '.join(self.__subexprs)
@@ -133,10 +115,14 @@ def findExpressionPart(expr: str,
                 break
         else:
             rel_end_pos = len(part_expr)
+
     if direction == ScanDirection.Right:
-        return SubExpression((index, index + rel_end_pos), expr)
+        sub_range = index, index + rel_end_pos
     else:
-        return SubExpression((index - rel_end_pos + 1, index + 1), expr)
+        index += 1
+        sub_range = index - rel_end_pos, index
+
+    return SubExpression(sub_range, expr)
 
 
 def findExpressionParts(expr: str, index: int) -> SubExpressions:
@@ -145,53 +131,65 @@ def findExpressionParts(expr: str, index: int) -> SubExpressions:
     return left_part + right_part
 
 
+def toPercent(value: Union[int, float]) -> float:
+    return value * 0.01
+
+
 def convertToPyExpr(raw_expr: str) -> str:
-    math = ''
     for index, char in enumerate(raw_expr):
         if char == '√':
-            math = 'sqrt'
+            func = 'sqrt'
             sub_expr = findExpressionPart(raw_expr, index)
             start, end = sub_expr.start - 1, sub_expr.end
-
-        if char == '^':
-            math = 'pow'
+        elif char == '^':
+            func = 'pow'
             sub_expr = findExpressionParts(raw_expr, index)
             start, end = sub_expr.start, sub_expr.end
+        elif char == '%':
+            func = 'toPercent'
+            sub_expr = findExpressionPart(raw_expr, index, ScanDirection.Left)
+            start, end = sub_expr.start, sub_expr.end + 1
+        else:
+            continue
 
-        if math:
-            expr = f'{raw_expr[:start]}{math}({str(sub_expr)}){raw_expr[end:]}'
-            return convertToPyExpr(expr)
+        expr = f'{raw_expr[:start]}{func}({sub_expr}){raw_expr[end:]}'
+        return convertToPyExpr(expr)
     else:
         return raw_expr
 
 
-def isExpression(text: str) -> bool:
-    if not text:
-        return False
-
-    valid_chars = '+-*/^'
-    math_char_count = 0
-    math_char = False
-    is_valid = False
-    for index, char in enumerate(text):
-        if math_char and not (char.isdigit() or char in '().'):
-            is_valid = False
-        else:
-            is_valid = True
-            math_char = False
-
-        if char in valid_chars:
-            math_char_count += 1
-            math_char = True
-
-        if math_char and len(text) == (index + 1):
-            is_valid = False
-        elif not math_char and len(text) == (index + 1) and math_char_count == 0:
-            is_valid = False
-        else:
-            is_valid = True
-
-    return is_valid
+# def isExpression(expression: str) -> bool:
+#     first_math_char = '+-*/^'
+#     second_math_char = '%√'
+#     is_expression = False
+#     math_char = False
+#     point = False
+#     for index, char in enumerate(expression):
+#         if (char in first_math_char or char in second_math_char) and index == 0:  # исключаем +/- числа
+#             continue
+#
+#         if char.isdigit() and math_char:
+#             is_expression = True
+#             continue
+#
+#         if char.isdigit():
+#             continue
+#
+#         if len(expression) == index + 1 and math_char:
+#             is_expression = False
+#             break
+#
+#         if char == '.' and point:
+#             is_expression = False
+#             break
+#
+#         if char == '.':
+#             point = True
+#
+#     else:
+#         if not is_expression:
+#             return False
+#         return True
 
 
 def isIdenticalExpressions(expr1: str, expr2: str) -> bool:
@@ -228,3 +226,4 @@ def canBeAdded(char: str, expression: str, position: int) -> bool:
 if __name__ == '__main__':
     print(calculate('(11-8)^(3-1)'))
     print(calculate('√(45+4)'))
+    print(calculate('30*45%'))
