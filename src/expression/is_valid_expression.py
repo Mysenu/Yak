@@ -86,19 +86,40 @@ isValidOperation
 
 
 def isBinaryOperation(text: str, index: int) -> bool:
+    # Проверяем операцию на унарность с помощью предыдущего символа
+    if index == 0 or text[index - 1] in BINARY_OPS | LEFT_UNARY_OPS or text[index] in RIGHT_UNARY_OPS:
+        return False
+    # Если условия не выполнены, то операция бинарная
     return True
 
 
 def isValidOperand(operand: str) -> bool:
-    pass
+    for char in operand:
+        print('isValidOperand: ', operand)
+        if char in BINARY_OPS | LEFT_UNARY_OPS | RIGHT_UNARY_OPS:
+            return isExpression(operand)
+    else:
+        print('isValidOperand: ', operand)
+        try:
+            if float(operand):
+                return True
+        except ValueError:
+            return False
 
 
 def isValidOperation(text: str, index: int) -> bool:
     if isBinaryOperation(text, index):
+        print('Binary: ', text[index])
         left_operand, right_operand = findOperands(text, index).subexprs
-        print(left_operand, right_operand)
-    return True
-
+        return isValidOperand(left_operand) and isValidOperand(right_operand)
+    else:
+        print('Unary: ', text[index])
+        if text[index] in LEFT_UNARY_OPS:
+            operand = findOperand(text, index, ScanDirection.Right)
+        else:
+            operand = findOperand(text, index, ScanDirection.Left)
+        print('Unary operand: ', operand)
+        return isValidOperand(operand)
 
 
 def isExpression(text: str) -> bool:
@@ -114,8 +135,10 @@ def isExpression(text: str) -> bool:
         while index < len(text):
             if isOperation(text, index):
                 if not isValidOperation(text, index):
+                    print('isExpression: ', text[index])
                     return False
             index += 1
     except SyntaxError:
         return False
     return True
+print(isExpression('45+√4'))
