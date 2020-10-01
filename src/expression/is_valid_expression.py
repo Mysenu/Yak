@@ -16,6 +16,7 @@ def findOperand(expr: str,
     Finds the range of a subexpression at the specified index and
     direction, and returns an object of the Subexpression class.
     """
+    print(expr, ' | findOperand', ' | Index: ', index)
     if not expr:
         return
 
@@ -43,18 +44,23 @@ def findOperand(expr: str,
                 raise SyntaxError('Unmatched bracket')
 
             if bracket_count == 0:
-                rel_end_pos = rel_pos
+                # Обрезаем скобки
+                index += 1
+                rel_end_pos = rel_pos - 1
                 break
         else:
             if bracket_count == 0:
-                rel_end_pos = len(part_expr) - 1
+                # Обрезаем скобки
+                index += 1
+                rel_end_pos = len(part_expr) - 2
             else:
                 raise SyntaxError('Unmatched bracket')
     else:
         for rel_pos, char in enumerate(part_expr):
-            if not char.isdigit() and char != '.' and char != '√':
-                rel_end_pos = rel_pos
-                break
+            if char in LEFT_UNARY_OPS | RIGHT_UNARY_OPS | BINARY_OPS:
+                if isBinaryOperation(expr, len(expr) - len(part_expr) + rel_pos):
+                    rel_end_pos = rel_pos
+                    break
         else:
             rel_end_pos = len(part_expr)
 
@@ -87,19 +93,20 @@ isValidOperation
 
 def isBinaryOperation(text: str, index: int) -> bool:
     # Проверяем операцию на унарность с помощью предыдущего символа
+    print(text, ' | ', 'isBinaryOperation: ', text[index], ' | Index: ', index)
     if index == 0 or text[index - 1] in BINARY_OPS | LEFT_UNARY_OPS or text[index] in RIGHT_UNARY_OPS:
+        print(text, ' | ', 'isBinaryOperation: No', ' | Index: ', index)
         return False
     # Если условия не выполнены, то операция бинарная
+    print(text, ' | ', 'isBinaryOperation: Yes', ' | Index: ', index)
     return True
 
 
 def isValidOperand(operand: str) -> bool:
     for char in operand:
-        print('isValidOperand: ', operand)
         if char in BINARY_OPS | LEFT_UNARY_OPS | RIGHT_UNARY_OPS:
             return isExpression(operand)
     else:
-        print('isValidOperand: ', operand)
         try:
             if float(operand):
                 return True
@@ -108,17 +115,17 @@ def isValidOperand(operand: str) -> bool:
 
 
 def isValidOperation(text: str, index: int) -> bool:
+    print(text, ' | isValidOperation: ', text, 'Index: ', index)
     if isBinaryOperation(text, index):
-        print('Binary: ', text[index])
         left_operand, right_operand = findOperands(text, index).subexprs
+        print(text, ' | isValidOperation: ', left_operand, right_operand)
         return isValidOperand(left_operand) and isValidOperand(right_operand)
     else:
-        print('Unary: ', text[index])
         if text[index] in LEFT_UNARY_OPS:
-            operand = findOperand(text, index, ScanDirection.Right)
+            operand = findOperand(text, index, ScanDirection.Right).subexpr
         else:
-            operand = findOperand(text, index, ScanDirection.Left)
-        print('Unary operand: ', operand)
+            operand = findOperand(text, index, ScanDirection.Left).subexpr
+        print(text, ' | isValidOperation: ', operand)
         return isValidOperand(operand)
 
 
@@ -141,4 +148,5 @@ def isExpression(text: str) -> bool:
     except SyntaxError:
         return False
     return True
-print(isExpression('45+√4'))
+# print(isExpression('√(48-1)'))
+print(isExpression('√-(1-2)'))
