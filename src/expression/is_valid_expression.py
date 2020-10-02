@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional
 
 from src.expression.expressions import ScanDirection, SubExpression, SubExpressions
 
@@ -6,6 +6,7 @@ from src.expression.expressions import ScanDirection, SubExpression, SubExpressi
 LEFT_UNARY_OPS = set('-+√')
 RIGHT_UNARY_OPS = set('%')
 BINARY_OPS = set('+-*/^')
+ALL_OPS = BINARY_OPS | LEFT_UNARY_OPS | RIGHT_UNARY_OPS
 VALID_CHARS = set('0123456789+-/*.()√^% ')
 
 
@@ -22,19 +23,18 @@ def findOperand(expr: str,
 
     if direction == ScanDirection.Right:
         index += 1
-        part_expr = expr[index:]
+        expr_part = expr[index:]
         open_bracket = '('
         close_bracket = ')'
     else:  # pos_expr == ScanDirection.Left:
+        expr_part = expr[:index][::-1]
         index -= 1
-        part_expr = expr[:index + 1][::-1]
         open_bracket = ')'
         close_bracket = '('
 
-    src_char = expr[index]
-    if src_char == '(' or src_char == ')':
+    if expr[index] == open_bracket:
         bracket_count = 0
-        for rel_pos, char in enumerate(part_expr):
+        for rel_pos, char in enumerate(expr_part):
             if char == open_bracket:
                 bracket_count += 1
             elif char == close_bracket:
@@ -44,31 +44,31 @@ def findOperand(expr: str,
                 raise SyntaxError('Unmatched bracket')
 
             if bracket_count == 0:
-                # Обрезаем скобки
-                index += 1
                 rel_end_pos = rel_pos - 1
                 break
         else:
-            if bracket_count == 0:
-                # Обрезаем скобки
-                index += 1
-                rel_end_pos = len(part_expr) - 2
-            else:
                 raise SyntaxError('Unmatched bracket')
+        # Обрезаем начальную скобку
+        start_pos = index + 1
     else:
-        for rel_pos, char in enumerate(part_expr):
-            if char in LEFT_UNARY_OPS | RIGHT_UNARY_OPS | BINARY_OPS:
-                if isBinaryOperation(expr, len(expr) - len(part_expr) + rel_pos):
-                    rel_end_pos = rel_pos
+        for rel_pos, char in enumerate(expr_part):
+            if char in '()':
+                rel_end_pos = rel_pos - 1
+                break
+
+            if isOperation(expr_part, rel_pos):
+                if isBinaryOperation(expr, len(expr) - len(expr_part) + rel_pos):
+                    rel_end_pos = rel_pos - 1
                     break
         else:
-            rel_end_pos = len(part_expr)
+            rel_end_pos = len(expr_part) - 1
 
     if direction == ScanDirection.Right:
-        sub_range = index, index + rel_end_pos
-    else:
-        index += 1
-        sub_range = index - rel_end_pos, index
+        sub_range = index, index + rel_end_pos + 1
+        print(expr[index:index + rel_end_pos + 1], 'Right')
+    else:  # ScanDirection.Left
+        sub_range = index - rel_end_pos, index + 1
+        print(expr[index - rel_end_pos:index + 1], 'Left')
     return SubExpression(sub_range, expr)
 
 
@@ -79,54 +79,50 @@ def findOperands(expr: str, index: int) -> SubExpressions:
 
 
 def isOperation(text: str, index: int) -> bool:
-    return text[index] in BINARY_OPS | LEFT_UNARY_OPS | RIGHT_UNARY_OPS
-
-
-'''
-isValidOperand
-isValidBinaryOperation
-isValidUnaryOperation
-isBinaryOperation
-isValidOperation
-'''
+    return text[index] in ALL_OPS
 
 
 def isBinaryOperation(text: str, index: int) -> bool:
     # Проверяем операцию на унарность с помощью предыдущего символа
     print(text, ' | ', 'isBinaryOperation: ', text[index], ' | Index: ', index)
     if index == 0 or text[index - 1] in BINARY_OPS | LEFT_UNARY_OPS or text[index] in RIGHT_UNARY_OPS:
-        print(text, ' | ', 'isBinaryOperation: No', ' | Index: ', index)
+        print(text, ' | ', 'isBinaryOperation: Not', ' | Index: ', index)
         return False
     # Если условия не выполнены, то операция бинарная
     print(text, ' | ', 'isBinaryOperation: Yes', ' | Index: ', index)
     return True
 
 
-def isValidOperand(operand: str) -> bool:
-    for char in operand:
-        if char in BINARY_OPS | LEFT_UNARY_OPS | RIGHT_UNARY_OPS:
-            return isExpression(operand)
-    else:
-        try:
-            if float(operand):
-                return True
-        except ValueError:
-            return False
+def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
+    if isinstance(operand, SubExpression):
+        operand = str(operand)
+
+    try:
+        float(operand)
+        return True
+    except ValueError:
+        return None if set(operand).intersection(ALL_OPS) else False
 
 
 def isValidOperation(text: str, index: int) -> bool:
     print(text, ' | isValidOperation: ', text, 'Index: ', index)
     if isBinaryOperation(text, index):
-        left_operand, right_operand = findOperands(text, index).subexprs
+        left_operand, right_operand = findOperands(text, index)
         print(text, ' | isValidOperation: ', left_operand, right_operand)
-        return isValidOperand(left_operand) and isValidOperand(right_operand)
+        operands = isValidOperand(left_operand), isValidOperand(right_operand)
     else:
         if text[index] in LEFT_UNARY_OPS:
-            operand = findOperand(text, index, ScanDirection.Right).subexpr
+            operand = findOperand(text, index, ScanDirection.Right)
         else:
-            operand = findOperand(text, index, ScanDirection.Left).subexpr
+            operand = findOperand(text, index, ScanDirection.Left)
         print(text, ' | isValidOperation: ', operand)
-        return isValidOperand(operand)
+        operands = isValidOperand(operand),
+
+    if False in operands:
+        return False
+    if None in operands:
+        return None
+    return True
 
 
 def isExpression(text: str) -> bool:
@@ -141,7 +137,7 @@ def isExpression(text: str) -> bool:
         index = 0
         while index < len(text):
             if isOperation(text, index):
-                if not isValidOperation(text, index):
+                if isValidOperation(text, index) is False:
                     print('isExpression: ', text[index])
                     return False
             index += 1
@@ -149,4 +145,4 @@ def isExpression(text: str) -> bool:
         return False
     return True
 # print(isExpression('√(48-1)'))
-print(isExpression('√-(1-2)'))
+print(isExpression('-(5+√6%)'))
