@@ -44,7 +44,7 @@ class SubExpression:
         return SubExpressions(self.__range, other.__range, self.subexpr, other.subexpr)
 
     def __str__(self):
-        return f'{self.subexpr}'
+        return self.subexpr
 
 
 class SubExpressions:
@@ -72,10 +72,16 @@ class SubExpressions:
     def __str__(self) -> str:
         return ', '.join(self.__subexprs)
 
+    def __len__(self) -> int:
+        return 2
+
+    def __getitem__(self, index: int) -> str:
+        return self.__subexprs[index]
+
 
 def findExpressionPart(expr: str,
                        index: int,
-                       direction: int = ScanDirection.Right) -> Union[SubExpression, None]:
+                       direction: int = ScanDirection.Right) -> Optional[SubExpression]:
     """
     Finds the range of a subexpression at the specified index and
     direction, and returns an object of the Subexpression class.
@@ -121,7 +127,6 @@ def findExpressionPart(expr: str,
     else:
         index += 1
         sub_range = index - rel_end_pos, index
-    print(expr[sub_range[0]:sub_range[1]])
     return SubExpression(sub_range, expr)
 
 
@@ -158,47 +163,6 @@ def convertToPyExpr(raw_expr: str) -> str:
         return raw_expr
 
 
-def isExpression(text: str) -> bool:
-    LEFT_UNARY_OPS = '-+√'
-    RIGHT_UNARY_OPS = '%'
-    BINARY_OPS = '+-*/^'
-
-    if not text:
-        return False
-
-    is_expression = True
-    op_char_found = False  # Todo: Rename
-    dot_found = False
-
-    for index, char in enumerate(text):
-        if index == 0 and char in LEFT_UNARY_OPS:
-            continue
-
-        if char in BINARY_OPS:
-            op_char_found = True
-
-        if op_char_found and char.isdigit():
-            is_expression = True
-            continue
-
-        if char in RIGHT_UNARY_OPS:
-            is_expression = True
-
-        if char.isdigit() or char in '()':
-            continue
-
-        if len(text) == index + 1 and op_char_found:
-            return False
-
-        if char == '.':
-            if dot_found:
-                return False
-            else:
-                dot_found = True
-
-    return is_expression
-
-
 def calculate(expression: str) -> Optional[Union[int, float, bool]]:
     if expression.strip():
         expression = prepareExpression(expression, True)
@@ -212,7 +176,7 @@ def canBeAdded(char: str, expression: str, position: int) -> bool:
 
 if __name__ == '__main__':
     def testExpr(text):
-        print(f'Source: {text} | Py: {convertToPyExpr(text)} | Valid: {isExpression(text)}')
+        print(f'Source: {text} | Py: {convertToPyExpr(text)}')
     # print(calculate('(11-8)^(3-1)'))
     # print(calculate('√(45+4)'))
     # print(calculate('30*45%'))
@@ -236,7 +200,8 @@ if __name__ == '__main__':
     # testExpr('√√')
     # testExpr('4+4()')
     # testExpr('')
-    print(convertToPyExpr('√(4+1)%'))
-    print(convertToPyExpr('√4+1%'))
-    print(convertToPyExpr('√(4+1)'))
-    print(convertToPyExpr('4+√5'))
+    # testExpr('')
+    # print(convertToPyExpr('√(4+1)%'))
+    # print(convertToPyExpr('√4+1%'))
+    # print(convertToPyExpr('√(4+1)'))
+    # print(convertToPyExpr('4+√5'))
