@@ -36,11 +36,14 @@ def findOperand(expr: str,
         index -= 1
         open_bracket = ')'
         close_bracket = '('
+
     start_pos = index
     if expr[index] == open_bracket:
         bracket_count = 0
+
         if scan_left:
             index = -index
+
         for pos, char in enumerate(expr_part, index):
             if char == open_bracket:
                 bracket_count += 1
@@ -52,10 +55,10 @@ def findOperand(expr: str,
 
             if bracket_count == 0:
                 if scan_left:
-                    start_pos = pos + 1
-                    end_pos = -(index + 1)
-                    print(start_pos, end_pos, 'Hey')
+                    start_pos = abs(pos) + 1
+                    end_pos = abs(index + 1)
                 else:
+                    start_pos += 1
                     end_pos = pos - 1
                 break
         else:
@@ -66,26 +69,30 @@ def findOperand(expr: str,
         for pos, char in enumerate(expr_part, index):
             if char in '()':
                 if scan_left:
-                    end_pos = pos + 1
+                    start_pos = abs(pos) + 1
+                    end_pos = abs(index)
                 else:
                     end_pos = pos - 1
                 break
 
             if isOperation(expr, pos):
-                if isBinaryOperation(expr, pos):
+                if isBinaryOperation(expr, abs(pos)):
                     if scan_left:
-                        end_pos = pos + 1
+                        start_pos = abs(pos) + 1
+                        end_pos = abs(index)
                     else:
                         end_pos = pos - 1
                     break
         else:
             if scan_left:
-                end_pos = pos + 1
+                start_pos = abs(pos)
+                end_pos = abs(index)
             else:
-                end_pos = pos - 1
+                end_pos = pos
 
     if direction == ScanDirection.Right:
         sub_range = start_pos, end_pos + 1
+        print(start_pos, end_pos + 1, 'Right')
         print(expr[start_pos:end_pos + 1], 'Right')
     else:  # ScanDirection.Left
         sub_range = start_pos, end_pos + 1
@@ -105,11 +112,15 @@ def isOperation(text: str, index: int) -> bool:
 
 
 def isBinaryOperation(text: str, index: int) -> bool:
+    if text[index].isdigit():
+        return False
+
     if text[index] in ALWAYS_BINARY_OPS:
         return True
+
     # Проверяем операцию на унарность с помощью предыдущего символа
     print(text, ' | ', 'isBinaryOperation: ', text[index], ' | Index: ', index)
-    if index == 0 or text[index - 1] in BINARY_OPS | LEFT_UNARY_OPS or text[index] in RIGHT_UNARY_OPS:
+    if index == 0 or text[index - 1] in BINARY_OPS | LEFT_UNARY_OPS or text[index] in RIGHT_UNARY_OPS or text[index - 1] in '()':
         print(text, ' | ', 'isBinaryOperation: Not', ' | Index: ', index)
         return False
     # Если условия не выполнены, то операция бинарная
@@ -146,7 +157,6 @@ def isValidOperation(text: str, index: int) -> bool:
         return False
 
     if False in operands:
-        print('lol')
         return False
     if None in operands:
         return None
@@ -198,5 +208,5 @@ def isExpression(text: str) -> bool:
         return False
 
     return True
-# print(isExpression('√(48-1)'))
-print(isExpression('(8-1)+(63+3)'))
+# print(isExpression('√48-1+3'))
+# print(isExpression('38-1+15+1'))
