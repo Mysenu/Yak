@@ -6,11 +6,11 @@ from src.expression.expressions import ScanDirection, SubExpression, SubExpressi
 LEFT_UNARY_OPS = set('-+√')
 RIGHT_UNARY_OPS = set('%')
 BINARY_OPS = set('+-*/^')
-ALWAYS_BINARY_OPS = set('*/^')
+ALWAYS_BINARY_OPS = BINARY_OPS - (RIGHT_UNARY_OPS | LEFT_UNARY_OPS)
 ROOT_OP = '√'
-PROCENT_OP = '%'
+PERCENT_OP = '%'
 ALL_OPS = BINARY_OPS | LEFT_UNARY_OPS | RIGHT_UNARY_OPS
-VALID_CHARS = set('0123456789+-/*.()√^% ')
+VALID_CHARS = set('0123456789 ') | ALL_OPS
 
 
 def findOperand(expr: str,
@@ -119,12 +119,12 @@ def isBinaryOperation(text: str, index: int) -> bool:
         return True
 
     # Проверяем операцию на унарность с помощью предыдущего символа
-    print(text, ' | ', 'isBinaryOperation: ', text[index], ' | Index: ', index)
+    print(text, ' | ', 'isBinaryOperation -> ', text[index], '? | Index: ', index)
     if index == 0 or text[index - 1] in BINARY_OPS | LEFT_UNARY_OPS or text[index] in RIGHT_UNARY_OPS or text[index - 1] in '()':
-        print(text, ' | ', 'isBinaryOperation: Not', ' | Index: ', index)
+        print(text, ' | ', 'isBinaryOperation: Not')
         return False
     # Если условия не выполнены, то операция бинарная
-    print(text, ' | ', 'isBinaryOperation: Yes', ' | Index: ', index)
+    print(text, ' | ', 'isBinaryOperation: Yes')
     return True
 
 
@@ -172,6 +172,8 @@ def isExpression(text: str) -> bool:
         return False
 
     operation_count = 0
+    operand_count = 0
+    bracket_count = 0
     char_is_digit = False
     char_is_procent = False
 
@@ -190,7 +192,7 @@ def isExpression(text: str) -> bool:
             else:
                 char_is_digit = False
 
-            if char == PROCENT_OP:
+            if char == PERCENT_OP:
                 char_is_procent = True
             else:
                 char_is_procent = False
@@ -200,6 +202,21 @@ def isExpression(text: str) -> bool:
                 if isValidOperation(text, index) is False:
                     print('isExpression: ', text[index])
                     return False
+                if isBinaryOperation(text, index):
+                    operand_count = 0
+            elif char == ' ':
+                pass
+            elif char == '(':
+                bracket_count += 1
+            elif char == ')':
+                bracket_count -= 1
+            else:
+                operand_count += 1
+                if operand_count > 1:
+                    return False
+
+            if bracket_count < 0:
+                return False
             index += 1
     except SyntaxError:
         return False
@@ -207,6 +224,9 @@ def isExpression(text: str) -> bool:
     if operation_count < 1:
         return False
 
+    if bracket_count != 0:
+        return False
+
     return True
 # print(isExpression('√48-1+3'))
-# print(isExpression('38-1+15+1'))
+print(isExpression('1+(3+4)-2'))
