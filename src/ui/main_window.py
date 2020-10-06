@@ -4,7 +4,8 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLin
     QFileDialog, QGridLayout
 
 from src.core.core import saveHistoryToFile
-from src.expression.expressions import prepareExpression, calculate, isExpression, isIdenticalExpressions, canBeAdded
+from src.expression.expressions import prepareExpression, calculate, canBeAdded
+from src.expression.is_valid_expression import isExpression
 from src.history.history_list import HistoryListModel
 
 
@@ -289,7 +290,6 @@ class MainWindow(QWidget):
 
     def _addExpressionToHistory(self):
         expr = self.entry_field.text()
-        expr = prepareExpression(expr)
 
         if not isExpression(expr):
             return
@@ -298,8 +298,7 @@ class MainWindow(QWidget):
         if history_length:
             latest_expr_index = self.history_list_model.index(0, 0)
             latest_expr = self.history_list_model.data(latest_expr_index, Qt.UserRole)
-
-            if isIdenticalExpressions(expr, latest_expr):
+            if latest_expr == expr:
                 return
 
         self.history_list_model.addExpression(expr)
