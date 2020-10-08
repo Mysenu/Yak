@@ -18,6 +18,7 @@ class ScanDirection(IntEnum):
 
 class SubExpression:
     """The class is implemented as an object for ease of working with subexpression and their range."""
+
     def __init__(self, range: tuple = (0, 0), expr: str = '') -> None:
         self.__range = range
         self.__expr = expr
@@ -52,6 +53,7 @@ class SubExpression:
 
 class SubExpressions:
     """The class is implemented as an object for ease of working with subexpressions and their ranges."""
+
     def __init__(self, range_1: tuple, range_2: tuple, subexpr_1: str, subexpr_2: str) -> None:
         self.__range = min(range_1[0], range_2[0]), max(range_1[1], range_2[1])
         self.__subexprs = subexpr_1, subexpr_2
@@ -96,13 +98,15 @@ def findOperand(expr: str,
     if direction == ScanDirection.Right:
         scan_left = False
         index += 1
+        expr_part = expr[index:]
         part_range = range(index, len(expr))
         open_bracket = '('
         close_bracket = ')'
     else:  # pos_expr == ScanDirection.Left:
         scan_left = True
         index -= 1
-        part_range = range(0, index, -1)
+        expr_part = expr[:index + 1][::-1]
+        part_range = range(index, -1, -1)
         open_bracket = ')'
         close_bracket = '('
 
@@ -113,8 +117,7 @@ def findOperand(expr: str,
 
     if expr[index] == open_bracket:
         bracket_count = 0
-
-        for pos, char in zip(part_range, expr):
+        for pos, char in zip(part_range, expr_part):
             if char == open_bracket:
                 bracket_count += 1
             elif char == close_bracket:
@@ -125,32 +128,23 @@ def findOperand(expr: str,
 
             if bracket_count == 0:
                 if scan_left:
-                    start_pos = pos
-                    end_pos = index + 1
+                    start_pos = pos + 1
+                    end_pos = index - 1
                 else:
                     start_pos += 1
-                    end_pos = pos
+                    end_pos = pos - 1
                 break
         else:
-                raise SyntaxError('Unmatched bracket')
+            raise SyntaxError('Unmatched bracket')
     else:
-        for pos, char in zip(part_range, expr):
-            if char in '()':
+        for pos, char in zip(part_range, expr_part):
+            if char in '()' or (isOperation(expr, pos) and isBinaryOperation(expr, pos)):
                 if scan_left:
-                    start_pos = pos
-                    end_pos = index + 1
+                    start_pos = pos + 1
+                    end_pos = index
                 else:
-                    end_pos = pos
+                    end_pos = pos - 1
                 break
-
-            if isOperation(expr, pos):
-                if isBinaryOperation(expr, pos):
-                    if scan_left:
-                        start_pos = pos
-                        end_pos = index + 1
-                    else:
-                        end_pos = pos - 1
-                    break
         else:
             if scan_left:
                 start_pos = 0
@@ -192,7 +186,8 @@ def isBinaryOperation(text: str, index: int) -> bool:
 
     # Проверяем операцию на унарность с помощью предыдущего символа
     print(text, ' | ', 'isBinaryOperation -> ', text[index], '? | Index: ', index)
-    if index == 0 or text[index - 1] in BINARY_OPS | LEFT_UNARY_OPS or text[index] in RIGHT_UNARY_OPS or text[index - 1] in '()':
+    if index == 0 or text[index - 1] in BINARY_OPS | LEFT_UNARY_OPS or text[index] in RIGHT_UNARY_OPS or text[
+        index - 1] in '()':
         print(text, ' | ', 'isBinaryOperation: Not')
         return False
     # Если условия не выполнены, то операция бинарная
@@ -297,6 +292,9 @@ def isExpression(text: str) -> bool:
         return False
 
     return True
+
+
 # print(isExpression('√48-1+3'))
 # print(isExpression('√9'))
-print(findOperands('(45-3)^(34*4)', 6))
+print(findOperands('1+(45-3)^(34*4)-8', 8))
+print(findOperands('45^72', 2))
