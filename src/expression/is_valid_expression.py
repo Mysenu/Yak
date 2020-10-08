@@ -8,8 +8,7 @@ ALWAYS_BINARY_OPS = BINARY_OPS - (RIGHT_UNARY_OPS | LEFT_UNARY_OPS)
 ROOT_OP = '√'
 PERCENT_OP = '%'
 ALL_OPS = BINARY_OPS | LEFT_UNARY_OPS | RIGHT_UNARY_OPS
-NUMBERS = set('0123456789 ')
-VALID_CHARS = NUMBERS | ALL_OPS
+VALID_CHARS = set('0123456789. ') | ALL_OPS | set('()')
 
 
 class ScanDirection(IntEnum):
@@ -85,7 +84,7 @@ class SubExpressions:
 
 def findOperand(expr: str,
                 index: int,
-                direction: int = ScanDirection.Right) -> Union[SubExpression, bool]:
+                direction: int = ScanDirection.Right) -> Optional[SubExpression]:
     """
     Finds the range of a subexpression at the specified index and
     direction, and returns an object of the Subexpression class.
@@ -97,13 +96,13 @@ def findOperand(expr: str,
     if direction == ScanDirection.Right:
         scan_left = False
         index += 1
-        expr_part = expr[index:]
+        part_range = range(index, len(expr))
         open_bracket = '('
         close_bracket = ')'
     else:  # pos_expr == ScanDirection.Left:
         scan_left = True
-        expr_part = expr[:index][::-1]
         index -= 1
+        part_range = range(0, index, -1)
         open_bracket = ')'
         close_bracket = '('
 
@@ -111,13 +110,11 @@ def findOperand(expr: str,
         return None
 
     start_pos = index
+
     if expr[index] == open_bracket:
         bracket_count = 0
 
-        if scan_left:
-            index = -index
-
-        for pos, char in enumerate(expr_part, index):
+        for pos, char in zip(part_range, expr):
             if char == open_bracket:
                 bracket_count += 1
             elif char == close_bracket:
@@ -128,40 +125,38 @@ def findOperand(expr: str,
 
             if bracket_count == 0:
                 if scan_left:
-                    start_pos = abs(pos) + 1
-                    end_pos = abs(index + 1)
+                    start_pos = pos
+                    end_pos = index + 1
                 else:
                     start_pos += 1
-                    end_pos = pos - 1
+                    end_pos = pos
                 break
         else:
                 raise SyntaxError('Unmatched bracket')
     else:
-        if scan_left:
-            index = -index
-        for pos, char in enumerate(expr_part, index):
+        for pos, char in zip(part_range, expr):
             if char in '()':
                 if scan_left:
-                    start_pos = abs(pos) + 1
-                    end_pos = abs(index)
+                    start_pos = pos
+                    end_pos = index + 1
                 else:
-                    end_pos = pos - 1
+                    end_pos = pos
                 break
 
             if isOperation(expr, pos):
-                if isBinaryOperation(expr, abs(pos)):
+                if isBinaryOperation(expr, pos):
                     if scan_left:
-                        start_pos = abs(pos) + 1
-                        end_pos = abs(index)
+                        start_pos = pos
+                        end_pos = index + 1
                     else:
                         end_pos = pos - 1
                     break
         else:
             if scan_left:
-                start_pos = abs(pos)
-                end_pos = abs(index)
+                start_pos = 0
+                end_pos = index
             else:
-                end_pos = pos
+                end_pos = len(expr) - 1
 
     if direction == ScanDirection.Right:
         sub_range = start_pos, end_pos + 1
@@ -251,34 +246,17 @@ def isExpression(text: str) -> bool:
     if set(text) - VALID_CHARS:
         return False
 
-    if not set(text) - NUMBERS:
-        return False
+    # if not (set(text) - NUMBERS):
+    #     return False
 
     operand_count = 0
     bracket_count = 0
-    char_is_digit = False
-    char_is_procent = False
     first_operand = False
 
     try:
         index = 0
         while index < len(text):
             char = text[index]
-            if char == ROOT_OP and char_is_digit:
-                return False
-
-            if char.isdigit() and char_is_procent:
-                return False
-
-            if char.isdigit():
-                char_is_digit = True
-            else:
-                char_is_digit = False
-
-            if char == PERCENT_OP:
-                char_is_procent = True
-            else:
-                char_is_procent = False
 
             if isOperation(text, index):
                 is_valid_operation = isValidOperation(text, index)
@@ -321,3 +299,4 @@ def isExpression(text: str) -> bool:
     return True
 # print(isExpression('√48-1+3'))
 # print(isExpression('√9'))
+print(findOperands('(45-3)^(34*4)', 6))
