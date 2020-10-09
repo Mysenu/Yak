@@ -101,6 +101,9 @@ def findOperand(expr: str,
     if not expr:
         return None
 
+    if not isOperation(expr, index):
+        return None
+
     if direction == ScanDirection.Right:
         scan_left = False
         index += 1
@@ -116,7 +119,7 @@ def findOperand(expr: str,
         open_bracket = ')'
         close_bracket = '('
 
-    if index < 0:
+    if index < 0 or index >= len(expr):
         return None
 
     start_pos = index
@@ -170,6 +173,9 @@ def findOperand(expr: str,
 
 
 def findOperands(expr: str, index: int) -> Optional[SubExpressions]:
+    if index < 0 or index >= len(expr):
+        return None
+
     left_part = findOperand(expr, index, ScanDirection.Left)
     right_part = findOperand(expr, index, ScanDirection.Right)
 
@@ -186,7 +192,7 @@ def isOperation(text: str, index: int) -> bool:
 def operationRecognition(text: str, index: int) -> Union[Operation, bool]:
     char = text[index]
 
-    if char in ALL_OPS:
+    if char not in ALL_OPS:
         return False
 
     if char in ALWAYS_BINARY_OPS:
@@ -219,26 +225,36 @@ def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
         return None if set(operand).intersection(ALL_OPS) else False
 
 
-def isValidOperation(text: str, index: int) -> Optional[bool]:
-    print(text, ' | isValidOperation: ', text, 'Index: ', index)
-    try:
-        operation = operationRecognition(text, index)
-        if operation == Operation.Binary:
-            left_operand, right_operand = findOperands(text, index)
-            print(text, ' | isValidOperation: ', left_operand, right_operand)
-            operands = isValidOperand(left_operand), isValidOperand(right_operand)
-        elif operation == Operation.Right_unary:
-            operands = isValidOperand(findOperand(text, index, ScanDirection.Left))
-        else:
-            operands = isValidOperand(findOperand(text, index, ScanDirection.Left))
-        print(text, ' | isValidOperation: ', operands)
-    except IndexError:
+def isValidOperation(expr: str, index: int) -> Optional[bool]:
+    print(expr, ' | isValidOperation: ', expr, 'Index: ', index)
+    if index < 0 or index >= len(expr):
+        return None
+
+    operation = operationRecognition(expr, index)
+
+    if operation == Operation.Binary:
+        result = findOperands(expr, index)
+        print(expr, ' | isValidOperation: ', result)
+    elif operation == Operation.Right_unary:
+        result = findOperand(expr, index, ScanDirection.Left)
+    elif operation == Operation.Left_unary:
+        result = findOperand(expr, index, ScanDirection.Right)
+        print(findOperand(expr, index, ScanDirection.Left))
+    else:
         return False
+
+    if result is None:
+        return None
+
+    if operation == Operation.Binary:
+        operands = isValidOperand(result[0]), isValidOperand(result[1])
+    else:
+        operands = isValidOperand(result),
+
+    print(expr, ' | isValidOperation: ', operands)
 
     if False in operands:
         return False
-    if None in operands:
-        return None
     return True
 
 
@@ -250,8 +266,10 @@ def isExpression(text: str) -> bool:
     if set(text) - VALID_CHARS:
         return False
 
-    # if not (set(text) - NUMBERS):
-    #     return False
+    # Проверяем на присутствие операций
+    if not (set(text) - (VALID_CHARS - ALL_OPS)):
+        return False
+    # TODO: Упростить написание через метод
 
     operand_count = 0
     bracket_count = 0
@@ -305,5 +323,5 @@ def isExpression(text: str) -> bool:
 
 # print(isExpression('√48-1+3'))
 # print(isExpression('√9'))
-print(findOperands('1+(45-3)^(34*4)-8', 8))
-print(findOperands('45^72', 2))
+# print(findOperands('1+(45-3)^(34*4)-8', 8))
+print(isExpression('45'))
