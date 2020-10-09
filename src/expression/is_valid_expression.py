@@ -16,6 +16,12 @@ class ScanDirection(IntEnum):
     Right = 2
 
 
+class Operation(IntEnum):
+    Binary = 1
+    Left_unary = 2
+    Right_unary = 3
+
+
 class SubExpression:
     """The class is implemented as an object for ease of working with subexpression and their range."""
 
@@ -138,7 +144,7 @@ def findOperand(expr: str,
             raise SyntaxError('Unmatched bracket')
     else:
         for pos, char in zip(part_range, expr_part):
-            if char in '()' or (isOperation(expr, pos) and isBinaryOperation(expr, pos)):
+            if char in '()' or (isOperation(expr, pos) and operationRecognition(expr, pos) == Operation.Binary):
                 if scan_left:
                     start_pos = pos + 1
                     end_pos = index
@@ -163,7 +169,7 @@ def findOperand(expr: str,
     return SubExpression(sub_range, expr)
 
 
-def findOperands(expr: str, index: int) -> SubExpressions:
+def findOperands(expr: str, index: int) -> Optional[SubExpressions]:
     left_part = findOperand(expr, index, ScanDirection.Left)
     right_part = findOperand(expr, index, ScanDirection.Right)
 
@@ -177,22 +183,26 @@ def isOperation(text: str, index: int) -> bool:
     return text[index] in ALL_OPS
 
 
-def isBinaryOperation(text: str, index: int) -> bool:
-    if text[index].isdigit():
+def operationRecognition(text: str, index: int) -> Union[Operation, bool]:
+    char = text[index]
+
+    if char in ALL_OPS:
         return False
 
-    if text[index] in ALWAYS_BINARY_OPS:
-        return True
+    if char in ALWAYS_BINARY_OPS:
+        return Operation.Binary
 
-    # Проверяем операцию на унарность с помощью предыдущего символа
-    print(text, ' | ', 'isBinaryOperation -> ', text[index], '? | Index: ', index)
-    if index == 0 or text[index - 1] in BINARY_OPS | LEFT_UNARY_OPS or text[index] in RIGHT_UNARY_OPS or text[
-        index - 1] in '()':
-        print(text, ' | ', 'isBinaryOperation: Not')
-        return False
-    # Если условия не выполнены, то операция бинарная
-    print(text, ' | ', 'isBinaryOperation: Yes')
-    return True
+    if char in ROOT_OP:
+        return Operation.Left_unary
+
+    if char in RIGHT_UNARY_OPS:
+        return Operation.Left_unary
+
+    if char in LEFT_UNARY_OPS and (text[max(index - 1, 0)] in BINARY_OPS or index == 0):
+        return Operation.Right_unary
+
+    if char in BINARY_OPS and text[max(index - 1, 0)] in (VALID_CHARS - ALL_OPS):
+        return Operation.Binary
 
 
 def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
@@ -209,20 +219,19 @@ def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
         return None if set(operand).intersection(ALL_OPS) else False
 
 
-def isValidOperation(text: str, index: int) -> bool:
+def isValidOperation(text: str, index: int) -> Optional[bool]:
     print(text, ' | isValidOperation: ', text, 'Index: ', index)
     try:
-        if isBinaryOperation(text, index):
+        operation = operationRecognition(text, index)
+        if operation == Operation.Binary:
             left_operand, right_operand = findOperands(text, index)
             print(text, ' | isValidOperation: ', left_operand, right_operand)
             operands = isValidOperand(left_operand), isValidOperand(right_operand)
+        elif operation == Operation.Right_unary:
+            operands = isValidOperand(findOperand(text, index, ScanDirection.Left))
         else:
-            if text[index] in LEFT_UNARY_OPS:
-                operand = findOperand(text, index, ScanDirection.Right)
-            else:
-                operand = findOperand(text, index, ScanDirection.Left)
-            print(text, ' | isValidOperation: ', operand)
-            operands = isValidOperand(operand),
+            operands = isValidOperand(findOperand(text, index, ScanDirection.Left))
+        print(text, ' | isValidOperation: ', operands)
     except IndexError:
         return False
 
@@ -258,7 +267,7 @@ def isExpression(text: str) -> bool:
                 if is_valid_operation is False or is_valid_operation is None:
                     print('isExpression: ', text[index])
                     return False
-                if isBinaryOperation(text, index):
+                if operationRecognition(text, index) == Operation.Binary:
                     first_operand = False
                     operand_count = 0
             elif char == '(':
