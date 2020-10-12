@@ -95,9 +95,19 @@ def isOperation(text: str, index: int) -> bool:
 
 
 def operationType(text: str, index: int) -> Union[OperationType, bool]:
-    # Todo: Что делать с пробелами?
     char = text[index]
-    prev_char = text[max(index - 1, 0)]
+    prev_index = index - 1
+    prev_char = ''
+
+    while not prev_char:
+        if prev_index < 0:
+            prev_char = char
+
+        if text[prev_index] == ' ':
+            prev_index -= 1
+            continue
+        else:
+            prev_char = text[prev_index]
 
     if char not in ALL_OPS:
         return False
@@ -114,7 +124,7 @@ def operationType(text: str, index: int) -> Union[OperationType, bool]:
     if char in LEFT_UNARY_OPS and (prev_char in BINARY_OPS or prev_char == '(' or index == 0):
         return OperationType.LeftUnary
 
-    if char in BINARY_OPS and prev_char in (VALID_CHARS - (ALL_OPS - RIGHT_UNARY_OPS)):
+    if char in BINARY_OPS and prev_char in VALID_CHARS.difference(ALL_OPS.difference(RIGHT_UNARY_OPS)):
         return OperationType.Binary
 
     return OperationType.RightUnary
@@ -318,5 +328,5 @@ def isExpression(text: str) -> bool:
 # print(isExpression('√48-1+3'))
 # print(isExpression('√9'))
 # print(findOperands('1+(45-3)^(34*4)-8', 8))
-print(isExpression('√45'))
-# print(operationType('43+(--9)+√5', 5))
+# print(isExpression('√45'))
+print(operationType('-4 3   + ( -9)+√ 5', 11))
