@@ -259,13 +259,12 @@ def isExpression(text: str) -> bool:
         return False
 
     # Проверяем на наличие невалидных символов
-    if set(text) - VALID_CHARS:
+    if set(text).difference(VALID_CHARS):
         return False
 
     # Проверяем на присутствие операций
-    if not (set(text) - (VALID_CHARS - ALL_OPS)):
+    if not set(text).difference(VALID_CHARS.difference(ALL_OPS)):
         return False
-    # TODO: Упростить написание через метод
 
     operand_count = 0
     bracket_count = 0
@@ -319,5 +318,5 @@ def isExpression(text: str) -> bool:
 # print(isExpression('√48-1+3'))
 # print(isExpression('√9'))
 # print(findOperands('1+(45-3)^(34*4)-8', 8))
-# print(isExpression('45'))
-print(operationType('43+(--9)+√5', 5))
+print(isExpression('√45'))
+# print(operationType('43+(--9)+√5', 5))
