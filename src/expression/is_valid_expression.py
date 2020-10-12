@@ -97,6 +97,7 @@ def isOperation(text: str, index: int) -> bool:
 def operationType(text: str, index: int) -> Union[OperationType, bool]:
     # Todo: Что делать с пробелами?
     char = text[index]
+    prev_char = text[max(index - 1, 0)]
 
     if char not in ALL_OPS:
         return False
@@ -110,11 +111,10 @@ def operationType(text: str, index: int) -> Union[OperationType, bool]:
     if char in ALWAYS_RIGHT_UNARY:
         return OperationType.RightUnary
 
-    if char in LEFT_UNARY_OPS and (text[max(index - 1, 0)] in BINARY_OPS or index == 0):
+    if char in LEFT_UNARY_OPS and (prev_char in BINARY_OPS or prev_char == '(' or index == 0):
         return OperationType.LeftUnary
 
-    if char in BINARY_OPS and text[max(index - 1, 0)] in (VALID_CHARS - ALL_OPS):
-        # Todo: А если после процента? "3%+1"
+    if char in BINARY_OPS and prev_char in (VALID_CHARS - (ALL_OPS - RIGHT_UNARY_OPS)):
         return OperationType.Binary
 
     return OperationType.RightUnary
@@ -318,5 +318,6 @@ def isExpression(text: str) -> bool:
 
 # print(isExpression('√48-1+3'))
 # print(isExpression('√9'))
-print(findOperands('1+(45-3)^(34*4)-8', 8))
+# print(findOperands('1+(45-3)^(34*4)-8', 8))
 # print(isExpression('45'))
+print(operationType('43+(--9)+√5', 5))
