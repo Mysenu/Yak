@@ -137,14 +137,12 @@ def findOperand(expr: str,
     if direction == ScanDirection.Right:
         scan_left = False
         index += 1
-        expr_part = expr[index:]
         range_part = range(index, len(expr))
         open_bracket = '('
         close_bracket = ')'
     else:  # pos_expr == ScanDirection.Left:
         scan_left = True
         index -= 1
-        expr_part = expr[:index + 1][::-1]
         range_part = range(index, -1, -1)
         open_bracket = ')'
         close_bracket = '('
@@ -156,8 +154,8 @@ def findOperand(expr: str,
 
     if expr[index] == open_bracket:
         bracket_count = 0
-        for pos, char in zip(range_part, expr_part):
-            # Todo: Удалить expr_part, сделать через expr[pos]
+        for pos in range_part:
+            char = expr[pos]
             if char == open_bracket:
                 bracket_count += 1
             elif char == close_bracket:
@@ -177,8 +175,9 @@ def findOperand(expr: str,
         else:
             raise SyntaxError('Unmatched bracket')
     else:
-        for pos, char in zip(range_part, expr_part):
+        for pos in range_part:
             # Todo: Попробовать переписать в цикл while
+            char = expr[pos]
             if char in '()' or operationType(expr, pos) is OperationType.Binary:
                 if scan_left:
                     start_pos = pos + 1
@@ -319,5 +318,5 @@ def isExpression(text: str) -> bool:
 
 # print(isExpression('√48-1+3'))
 # print(isExpression('√9'))
-# print(findOperands('1+(45-3)^(34*4)-8', 8))
-print(isExpression('45'))
+print(findOperands('1+(45-3)^(34*4)-8', 8))
+# print(isExpression('45'))
