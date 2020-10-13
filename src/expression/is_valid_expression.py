@@ -94,24 +94,22 @@ def isOperation(text: str, index: int) -> bool:
     return text[index] in ALL_OPS
 
 
-# Todo: Проработать возвращаемые типы всех функций
-def operationType(text: str, index: int) -> Union[OperationType, bool]:
+def operationType(text: str, index: int) -> Optional[OperationType]:
     char = text[index]
 
+    if char not in ALL_OPS:
+        return None
+
     prev_index = index - 1
-    prev_char = ''
+    prev_char = None
     while not prev_char:
         if prev_index < 0:
-            prev_char = char
-        # Todo: +5 предыдущий символ будет +
+            break
 
         if text[prev_index] == ' ':
             prev_index -= 1
         else:
             prev_char = text[prev_index]
-
-    if char not in ALL_OPS:
-        return False
 
     if char in ALWAYS_BINARY_OPS:
         return OperationType.Binary
@@ -123,12 +121,11 @@ def operationType(text: str, index: int) -> Union[OperationType, bool]:
         return OperationType.RightUnary
 
     if char in LEFT_UNARY_OPS:
-        if prev_char in BINARY_OPS or prev_char == '(' or index == 0:
+        if prev_char in BINARY_OPS or prev_char == '(' or prev_char is None:
             return OperationType.LeftUnary
 
     if char in BINARY_OPS:
-        if prev_char in VALID_CHARS - (ALL_OPS - RIGHT_UNARY_OPS):
-            # Todo: А если после скобок? (-9)
+        if prev_char in VALID_CHARS - (ALL_OPS - RIGHT_UNARY_OPS) - set('('):
             return OperationType.Binary
 
     return OperationType.RightUnary
@@ -330,7 +327,4 @@ def isExpression(text: str) -> bool:
 
 
 # print(isExpression('√48-1+3'))
-# print(isExpression('√9'))
-print(findOperands('1+(45-3)^(34*4)-8', 15))
-# print(isExpression('√45'))
-# print(operationType('-4 3   + ( -9)+√ 5', 11))
+print(operationType('(-9)', 1))
