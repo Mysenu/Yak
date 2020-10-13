@@ -229,6 +229,16 @@ def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
     if isinstance(operand, SubExpression):
         operand = str(operand)
 
+    if operand[0] == '0':
+        for char in operand:
+            if char == '.':
+                break
+
+            if char == '0':
+                continue
+            else:
+                return False
+
     if operand is None:
         return None
 
@@ -326,5 +336,4 @@ def isExpression(text: str) -> bool:
     return True
 
 
-# print(isExpression('√48-1+3'))
-print(operationType('(-9)', 1))
+# print(isExpression('√48-1+3'), 'RESULT')
