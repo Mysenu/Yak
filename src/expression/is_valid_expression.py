@@ -243,10 +243,13 @@ def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
         return None
 
     try:
+        if set(operand).intersection(ALL_OPS):
+            for op in ALL_OPS:
+                operand = operand.replace(op, '')
         float(operand)
         return True
     except ValueError:
-        return None if set(operand).intersection(ALL_OPS) else False
+        return False
 
 
 def isValidOperation(expr: str, index: int) -> Optional[bool]:
@@ -334,6 +337,3 @@ def isExpression(text: str) -> bool:
         return False
 
     return True
-
-
-# print(isExpression('√48-1+3'), 'RESULT')
