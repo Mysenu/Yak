@@ -11,8 +11,8 @@ from src.history.history_list import HistoryListModel
 
 class ExpressionField(QLineEdit):
     _valid_characters = '0123456789+-/*.()vV√^% '
-    _valid_keys = (Qt.Key_Backspace, Qt.Key_Enter, Qt.Key_Return,
-                   Qt.Key_Right, Qt.Key_Left, Qt.Key_Delete, Qt.Key_Home, Qt.Key_End)
+    _valid_keys = {Qt.Key_Backspace, Qt.Key_Enter, Qt.Key_Return,
+                   Qt.Key_Right, Qt.Key_Left, Qt.Key_Delete, Qt.Key_Home, Qt.Key_End}
 
     def __init__(self):
         super(ExpressionField, self).__init__()
@@ -55,6 +55,10 @@ class ExpressionField(QLineEdit):
 
         if event.matches(QKeySequence.Copy):
             pass
+
+    @property
+    def valid_keys(self):
+        return self._valid_keys
 
 
 class MainWindow(QWidget):
@@ -262,6 +266,27 @@ class MainWindow(QWidget):
         self.save_history_button.clicked.connect(self._saveHistoryButton)
 
         self.show()
+
+    def keyPressEvent(self, event: QKeyEvent):
+        key = event.key()
+        text = event.text()
+        expression = self.entry_field.text()
+        position = self.entry_field.cursorPosition()
+
+        if text.lower() == 'v' and canBeAdded('√', expression, position):
+            self.entry_field.insert('√')
+        elif canBeAdded(text, expression, position):
+            super(ExpressionField, self.entry_field).keyPressEvent(event)
+        elif key in self.entry_field.valid_keys:
+            super(ExpressionField, self.entry_field).keyPressEvent(event)
+        elif event.matches(QKeySequence.Cancel):
+            self.entry_field.clear()
+
+        if event.matches(QKeySequence.Paste):
+            pass
+
+        if event.matches(QKeySequence.Copy):
+            pass
 
     def _saveHistoryButton(self):
         if not self.history_list_model.notEmptyList():
