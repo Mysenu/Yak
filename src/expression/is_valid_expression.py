@@ -229,6 +229,9 @@ def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
     if isinstance(operand, SubExpression):
         operand = str(operand)
 
+    if not operand:
+        return None
+
     if operand[0] == '0':
         for char in operand:
             if char == '.':
