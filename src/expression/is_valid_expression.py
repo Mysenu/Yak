@@ -50,11 +50,14 @@ class SubExpression:
         start, end = self.__range
         return self.__expr[start:end]
 
-    def __add__(self, other):
+    def __add__(self, other) -> 'SubExpressionPair':
         return SubExpressionPair(self.__range, other.__range, self.subexpr, other.subexpr)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.subexpr
+
+    def __bool__(self) -> bool:
+        return bool(min(len(self.__range), len(self.__expr)))
 
 
 class SubExpressionPair:
@@ -100,6 +103,15 @@ def operationType(text: str, index: int) -> Optional[OperationType]:
     if char not in ALL_OPS:
         return None
 
+    if char in ALWAYS_BINARY_OPS:
+        return OperationType.Binary
+
+    if char in ALWAYS_LEFT_UNARY:
+        return OperationType.LeftUnary
+
+    if char in ALWAYS_RIGHT_UNARY:
+        return OperationType.RightUnary
+
     prev_index = index - 1
     prev_char = None
     while not prev_char:
@@ -110,15 +122,6 @@ def operationType(text: str, index: int) -> Optional[OperationType]:
             prev_index -= 1
         else:
             prev_char = text[prev_index]
-
-    if char in ALWAYS_BINARY_OPS:
-        return OperationType.Binary
-
-    if char in ALWAYS_LEFT_UNARY:
-        return OperationType.LeftUnary
-
-    if char in ALWAYS_RIGHT_UNARY:
-        return OperationType.RightUnary
 
     if char in LEFT_UNARY_OPS:
         if prev_char in BINARY_OPS or prev_char == '(' or prev_char is None:
@@ -138,7 +141,6 @@ def findOperand(expr: str,
     Finds the range of a subexpression at the specified index and
     direction, and returns an object of the Subexpression class.
     """
-    print(expr, ' | findOperand', ' | Index: ', index)
     if not expr:
         return None
 
@@ -164,8 +166,10 @@ def findOperand(expr: str,
     start_pos = index
 
     if expr[index] == open_bracket:
+        print(expr[index], 'Expr')
         bracket_count = 0
         for pos in range_part:
+            print(range_part, 'Bracket')
             char = expr[pos]
             if char == open_bracket:
                 bracket_count += 1
@@ -186,8 +190,9 @@ def findOperand(expr: str,
         else:
             raise SyntaxError('Unmatched bracket')
     else:
+        print(expr[index], 'Expr')
         for pos in range_part:
-            # Todo: Попробовать переписать в цикл while
+            print(range_part, 'Not bracket')
             char = expr[pos]
             if char in '()' or operationType(expr, pos) is OperationType.Binary:
                 if scan_left:
@@ -205,10 +210,8 @@ def findOperand(expr: str,
 
     if direction == ScanDirection.Right:
         sub_range = start_pos, end_pos + 1
-        print(expr[start_pos:end_pos + 1], 'Right')
     else:  # ScanDirection.Left
         sub_range = start_pos, end_pos + 1
-        print(expr[start_pos:end_pos + 1], 'Left')
     return SubExpression(sub_range, expr)
 
 
@@ -226,29 +229,33 @@ def findOperands(expr: str, index: int) -> Optional[SubExpressionPair]:
 
 
 def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
-    if isinstance(operand, SubExpression):
-        operand = str(operand)
-
     if not operand:
         return None
 
+    if isinstance(operand, SubExpression):
+        operand = str(operand)
+
+    first_point = False
     if operand[0] == '0':
         for char in operand:
             if char == '.':
-                break
-
-            if char == '0':
-                continue
-            else:
+                first_point = True
+            elif char == '.' and first_point:
                 return False
 
-    if operand is None:
-        return None
+            if char == '0' and not first_point:
+                continue
+            elif not first_point:
+                return False
+        else:
+            if first_point:
+                return True
+            return False
 
     try:
+        # Удаление всех операций из операнда
         if set(operand).intersection(ALL_OPS):
-            for op in ALL_OPS:
-                operand = operand.replace(op, '')
+            return isExpression(operand)
         float(operand)
         return True
     except ValueError:
@@ -256,8 +263,6 @@ def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
 
 
 def isValidOperation(expr: str, index: int) -> Optional[bool]:
-    print(expr, ' | isValidOperation: ', expr, 'Index: ', index)
-
     operation_type = operationType(expr, index)
 
     if operation_type == OperationType.Binary:
@@ -277,7 +282,6 @@ def isValidOperation(expr: str, index: int) -> Optional[bool]:
     else:
         operands = isValidOperand(result),
 
-    print(expr, ' | isValidOperation: ', operands)
     return all(operands)
 
 
@@ -290,7 +294,7 @@ def isExpression(text: str) -> bool:
         return False
 
     # Проверяем на присутствие операций
-    if not set(text).difference(VALID_CHARS.difference(ALL_OPS)):
+    if not set(text) - (VALID_CHARS - ALL_OPS):
         return False
 
     operand_count = 0
@@ -304,7 +308,6 @@ def isExpression(text: str) -> bool:
 
             if isOperation(text, index):
                 if isValidOperation(text, index) is not True:
-                    print('isExpression: ', text[index])
                     return False
                 if operationType(text, index) is OperationType.Binary:
                     first_operand = False
@@ -317,7 +320,6 @@ def isExpression(text: str) -> bool:
                 first_operand = True
                 operand_count += 1
                 if operand_count > 1:
-                    print('False operand count 1')
                     return False
             elif char == ' ':
                 pass
@@ -328,15 +330,14 @@ def isExpression(text: str) -> bool:
                     return False
 
             if bracket_count < 0:
-                print('False bracket count')
                 return False
             index += 1
     except SyntaxError:
-        print('False syntaxError')
         return False
 
     if bracket_count != 0:
-        print('False bracket count')
         return False
 
     return True
+
+print(findOperands('√(45^4-√(94^3-3)*45)', 6))
