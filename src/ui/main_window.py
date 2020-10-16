@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLin
     QFileDialog, QGridLayout
 
 from src.core.core import saveHistoryToFile
-from src.expression.expressions import prepareExpression, calculate, canBeAdded
+from src.expression.expressions import calculate, canBeAdded
 from src.expression.is_valid_expression import isExpression
 from src.history.history_list import HistoryListModel
 
@@ -311,7 +311,8 @@ class MainWindow(QWidget):
 
     def _calculateCurrentExpression(self):
         result = calculate(self.entry_field.text())
-        self.entry_field.setText(str(result))
+        if result is not None:
+            self.entry_field.setText(str(result))
 
     def _addExpressionToHistory(self):
         expr = self.entry_field.text()
