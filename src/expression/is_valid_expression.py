@@ -164,12 +164,25 @@ def findOperand(expr: str,
         return None
 
     start_pos = index
+    with_unary_op = True
+
+    while expr[index] in (ALWAYS_RIGHT_UNARY + ALWAYS_LEFT_UNARY):
+        index += 1
+        range_part = range(index, len(expr))
+
+        if direction == ScanDirection.Left:
+            range_part = range(index, -1, -1)
+
+        with_unary_op = True
 
     if expr[index] == open_bracket:
-        print(expr[index], 'Expr')
         bracket_count = 0
+        removed_brackets = 1
+
+        if with_unary_op:
+            removed_brackets = 0
+
         for pos in range_part:
-            print(range_part, 'Bracket')
             char = expr[pos]
             if char == open_bracket:
                 bracket_count += 1
@@ -181,18 +194,16 @@ def findOperand(expr: str,
 
             if bracket_count == 0:
                 if scan_left:
-                    start_pos = pos + 1
-                    end_pos = index - 1
+                    start_pos = pos + removed_brackets
+                    end_pos = index - removed_brackets
                 else:
-                    start_pos += 1
-                    end_pos = pos - 1
+                    start_pos += removed_brackets
+                    end_pos = pos - removed_brackets
                 break
         else:
             raise SyntaxError('Unmatched bracket')
     else:
-        print(expr[index], 'Expr')
         for pos in range_part:
-            print(range_part, 'Not bracket')
             char = expr[pos]
             if char in '()' or operationType(expr, pos) is OperationType.Binary:
                 if scan_left:
@@ -340,4 +351,5 @@ def isExpression(text: str) -> bool:
 
     return True
 
-print(findOperands('√(45^4-√(94^3-3)*45)', 6))
+
+print(findOperands('√(45^4-√√√√(94^3-3)*45)', 6))
