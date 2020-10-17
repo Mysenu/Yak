@@ -160,15 +160,24 @@ def findOperand(expr: str,
         open_bracket = ')'
         close_bracket = '('
 
-    if index < 0 or index >= len(expr):
+    expr_len = len(expr)
+
+    if index < 0 or index >= expr_len:
         return None
 
     start_pos = index
     with_unary_op = True
 
     while expr[index] in (ALWAYS_RIGHT_UNARY + ALWAYS_LEFT_UNARY):
-        index += 1
-        range_part = range(index, len(expr))
+        if direction == ScanDirection.Right:
+            index += 1
+        else:
+            index -= 1
+
+        if index + 1 > expr_len or index - 1 < 0:
+            return None
+
+        range_part = range(index, expr_len)
 
         if direction == ScanDirection.Left:
             range_part = range(index, -1, -1)
@@ -217,7 +226,7 @@ def findOperand(expr: str,
                 start_pos = 0
                 end_pos = index
             else:
-                end_pos = len(expr) - 1
+                end_pos = expr_len - 1
 
     if direction == ScanDirection.Right:
         sub_range = start_pos, end_pos + 1
