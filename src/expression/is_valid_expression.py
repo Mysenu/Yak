@@ -135,7 +135,7 @@ def operationType(text: str, index: int) -> Optional[OperationType]:
 
 
 def findOperand(expr: str,
-                index: int,
+                start_index: int,
                 direction: int = ScanDirection.Right) -> Optional[SubExpression]:
     """
     Finds the range of a subexpression at the specified index and
@@ -144,47 +144,48 @@ def findOperand(expr: str,
     if not expr:
         return None
 
-    if not isOperation(expr, index):
+    if not isOperation(expr, start_index):
         return None
 
     if direction == ScanDirection.Right:
         scan_left = False
-        index += 1
-        range_part = range(index, len(expr))
+        start_index += 1
+        range_part = range(start_index, len(expr))
         open_bracket = '('
         close_bracket = ')'
     else:  # pos_expr == ScanDirection.Left:
         scan_left = True
-        index -= 1
-        range_part = range(index, -1, -1)
+        start_index -= 1
+        range_part = range(start_index, -1, -1)
         open_bracket = ')'
         close_bracket = '('
 
     expr_len = len(expr)
 
-    if index < 0 or index >= expr_len:
+    if start_index < 0 or start_index >= expr_len:
         return None
 
-    start_pos = index
+    start_pos = start_index
+    abs_pos = start_index
     with_unary_op = True
 
-    while expr[index] in (ALWAYS_RIGHT_UNARY + ALWAYS_LEFT_UNARY):
+    while expr[abs_pos] in (ALWAYS_RIGHT_UNARY + ALWAYS_LEFT_UNARY):
         if direction == ScanDirection.Right:
-            index += 1
+            abs_pos += 1
         else:
-            index -= 1
+            abs_pos -= 1
 
-        if index + 1 > expr_len or index - 1 < 0:
+        if abs_pos > expr_len or abs_pos < 0:
             return None
 
-        range_part = range(index, expr_len)
+        range_part = range(abs_pos, expr_len)
 
         if direction == ScanDirection.Left:
-            range_part = range(index, -1, -1)
+            range_part = range(abs_pos, -1, -1)
 
         with_unary_op = True
 
-    if expr[index] == open_bracket:
+    if expr[abs_pos] == open_bracket:
         bracket_count = 0
         removed_brackets = 1
 
@@ -204,7 +205,7 @@ def findOperand(expr: str,
             if bracket_count == 0:
                 if scan_left:
                     start_pos = pos + removed_brackets
-                    end_pos = index - removed_brackets
+                    end_pos = abs_pos - removed_brackets
                 else:
                     start_pos += removed_brackets
                     end_pos = pos - removed_brackets
@@ -217,14 +218,14 @@ def findOperand(expr: str,
             if char in '()' or operationType(expr, pos) is OperationType.Binary:
                 if scan_left:
                     start_pos = pos + 1
-                    end_pos = index
+                    end_pos = start_index
                 else:
                     end_pos = pos - 1
                 break
         else:
             if scan_left:
                 start_pos = 0
-                end_pos = index
+                end_pos = start_index
             else:
                 end_pos = expr_len - 1
 
@@ -366,4 +367,3 @@ def isExpression(text: str) -> bool:
     return True
 
 
-print(findOperands('√(45^4-√√√√(94^3-3)*45)', 6))
