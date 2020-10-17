@@ -325,13 +325,18 @@ def isExpression(text: str) -> bool:
         index = 0
         while index < len(text):
             char = text[index]
-
-            if isOperation(text, index):
+            if char in ALWAYS_LEFT_UNARY and text[max(index - 1, 0)].isdigit():
+                return False
+            elif char in ALWAYS_RIGHT_UNARY and text[min(index + 1, len(text) - 1)].isdigit():
+                return False
+            elif isOperation(text, index):
                 if isValidOperation(text, index) is not True:
                     return False
                 if operationType(text, index) is OperationType.Binary:
                     first_operand = False
                     operand_count = 0
+            elif char == '(' and text[max(index - 1, 0)].isdigit():
+                return False
             elif char == '(':
                 bracket_count += 1
             elif char == ')':
