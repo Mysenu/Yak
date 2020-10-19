@@ -320,7 +320,7 @@ def isExpression(text: str) -> bool:
 
     operand_count = 0
     bracket_count = 0
-    first_operand = False
+    in_operand = False
 
     try:
         index = 0
@@ -334,7 +334,7 @@ def isExpression(text: str) -> bool:
                 if isValidOperation(text, index) is not True:
                     return False
                 if operationType(text, index) is OperationType.Binary:
-                    first_operand = False
+                    in_operand = False
                     operand_count = 0
             elif char == '(' and text[max(index - 1, 0)].isdigit():
                 return False
@@ -343,14 +343,14 @@ def isExpression(text: str) -> bool:
             elif char == ')':
                 bracket_count -= 1
             elif char == ' ' and text[max(index - 1, 0)].isdigit():
-                first_operand = True
+                in_operand = True
                 operand_count += 1
                 if operand_count > 1:
                     return False
             elif char == ' ':
                 pass
 
-            if char.isdigit() and first_operand:
+            if char.isdigit() and in_operand:
                 operand_count += 1
                 if operand_count > 1:
                     return False
