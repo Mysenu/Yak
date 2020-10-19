@@ -114,6 +114,8 @@ def operationType(text: str, index: int) -> Optional[OperationType]:
 
     prev_index = index - 1
     prev_char = None
+    next_index = index + 1
+    next_char = None
     while not prev_char:
         if prev_index < 0:
             break
@@ -123,15 +125,30 @@ def operationType(text: str, index: int) -> Optional[OperationType]:
         else:
             prev_char = text[prev_index]
 
-    if char in LEFT_UNARY_OPS:
-        if prev_char in BINARY_OPS or prev_char == '(' or prev_char is None:
-            return OperationType.LeftUnary
-
     if char in BINARY_OPS:
         if prev_char in VALID_CHARS - (ALL_OPS - RIGHT_UNARY_OPS) - set('('):
             return OperationType.Binary
 
-    return OperationType.RightUnary
+    if char in LEFT_UNARY_OPS:
+        if prev_char in BINARY_OPS or prev_char == '(':
+            return OperationType.LeftUnary
+
+        while not next_char:
+            if next_index >= len(text):
+                break
+
+            if text[next_index] == ' ':
+                next_index -= 1
+            else:
+                next_char = text[prev_index]
+
+            if next_char.isdigit() and next_char in '(√':
+                return OperationType.LeftUnary
+
+            if prev_char is None:
+                return OperationType.LeftUnary
+
+    return OperationType.Binary
 
 
 def findOperand(expr: str,
@@ -366,4 +383,4 @@ def isExpression(text: str) -> bool:
 
     return True
 
-
+print(operationType('-', 0))
