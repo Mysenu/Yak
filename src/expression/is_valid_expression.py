@@ -6,9 +6,11 @@ ALWAYS_RIGHT_UNARY = '%'
 LEFT_UNARY_OPS = set('-+√')
 RIGHT_UNARY_OPS = set('%')
 BINARY_OPS = set('+-*/^')
+BRACKETS = set('()')
 ALWAYS_BINARY_OPS = BINARY_OPS - (RIGHT_UNARY_OPS | LEFT_UNARY_OPS)
 ALL_OPS = BINARY_OPS | LEFT_UNARY_OPS | RIGHT_UNARY_OPS
-VALID_CHARS = set('0123456789. ') | ALL_OPS | set('()')
+OPERAND_CHARS = set('0123456789.') | BRACKETS
+VALID_CHARS = OPERAND_CHARS | ALL_OPS
 
 
 class ScanDirection(IntEnum):
@@ -20,6 +22,12 @@ class OperationType(IntEnum):
     Binary = 1
     LeftUnary = 2
     RightUnary = 3
+
+
+class OperandPart(IntEnum):
+    Left = 1
+    Middle = 2
+    Right = 3
 
 
 class SubExpression:
@@ -143,9 +151,6 @@ def operationType(text: str, index: int) -> Optional[OperationType]:
                 next_char = text[prev_index]
 
             if next_char.isdigit() and next_char in '(√':
-                return OperationType.LeftUnary
-
-            if prev_char is None:
                 return OperationType.LeftUnary
 
     return OperationType.Binary
@@ -323,64 +328,124 @@ def isValidOperation(expr: str, index: int) -> Optional[bool]:
     return all(operands)
 
 
-def isExpression(text: str) -> bool:
-    if not text:
+def isExpression(expr: str) -> bool:
+    expr.strip()
+
+    if not expr:
         return False
 
-    # Проверяем на наличие невалидных символов
-    if set(text).difference(VALID_CHARS):
+    if set(expr).difference(VALID_CHARS):
         return False
 
-    # Проверяем на присутствие операций
-    if not set(text) - (VALID_CHARS - ALL_OPS):
+    if not set(expr) - (VALID_CHARS - ALL_OPS):
         return False
 
-    operand_count = 0
-    bracket_count = 0
+    bracket_counter = 0
+    dot_counter = 0
+    operand_counter = 0
+
     in_operand = False
+    operand_part = OperandPart.Left
+    complex_middle_part = False
+    complex_middle_start_pos = None
+    complex_middle_end_pos = None
 
-    try:
-        index = 0
-        while index < len(text):
-            char = text[index]
-            if char in ALWAYS_LEFT_UNARY and text[max(index - 1, 0)].isdigit():
+    index = -1
+    while index < len(expr) - 1:
+        index += 1
+        char = expr[index]
+
+        if char in BRACKETS or complex_middle_part:
+            if char == '(':
+                bracket_counter += 1
+            if char == ')':
+                bracket_counter -= 1
+
+            if bracket_counter < 0:
                 return False
-            elif char in ALWAYS_RIGHT_UNARY and text[min(index + 1, len(text) - 1)].isdigit():
-                return False
-            elif isOperation(text, index):
-                if isValidOperation(text, index) is not True:
+
+            if bracket_counter == 1:
+                if not complex_middle_part:
+                    complex_middle_start_pos = index
+                complex_middle_part = True
+            if bracket_counter == 0:
+                complex_middle_part = False
+                complex_middle_end_pos = index
+                if isExpression(expr[complex_middle_start_pos + 1:complex_middle_end_pos]):
+                    index = complex_middle_end_pos
+                    operand_part = OperandPart.Right
+                    in_operand = True
+                else:
                     return False
-                if operationType(text, index) is OperationType.Binary:
-                    in_operand = False
-                    operand_count = 0
-            elif char == '(' and text[max(index - 1, 0)].isdigit():
+
+            if index == (len(expr) - 1) and bracket_counter > 0:
                 return False
-            elif char == '(':
-                bracket_count += 1
-            elif char == ')':
-                bracket_count -= 1
-            elif char == ' ' and text[max(index - 1, 0)].isdigit():
+
+            continue
+
+        if index == 0:
+            if char not in LEFT_UNARY_OPS and char not in OPERAND_CHARS:
+                return False
+            else:
                 in_operand = True
-                operand_count += 1
-                if operand_count > 1:
-                    return False
-            elif char == ' ':
-                pass
+                operand_counter += 1
+                operand_part = OperandPart.Left
 
-            if char.isdigit() and in_operand:
-                operand_count += 1
-                if operand_count > 1:
-                    return False
-
-            if bracket_count < 0:
+        if char == ' ':
+            if operand_part is OperandPart.Left:
                 return False
-            index += 1
-    except SyntaxError:
-        return False
+            if operand_part is OperandPart.Middle:
+                in_operand = False
+            if operand_part is OperandPart.Right:
+                in_operand = False
 
-    if bracket_count != 0:
-        return False
+        if in_operand:
+            if char == '.':
+                dot_counter += 1
+            if char in OPERAND_CHARS and operand_part is OperandPart.Left:
+                operand_part = OperandPart.Middle
+            if char in OPERAND_CHARS and operand_part is OperandPart.Right:
+                return False
+            if char in ALL_OPS:
+                if operand_part is OperandPart.Left and char not in LEFT_UNARY_OPS:
+                    return False
+                if operand_part is OperandPart.Middle and char in BINARY_OPS:
+                    in_operand = False
+                    dot_counter = 0
+                    operand_counter = 0
+                if operand_part is OperandPart.Middle and char in ALWAYS_LEFT_UNARY:
+                    return False
+                if operand_part is OperandPart.Right and char in ALWAYS_LEFT_UNARY:
+                    return False
+                if operand_part is OperandPart.Right and char in BINARY_OPS:
+                    in_operand = False
+                    dot_counter = 0
+                    operand_counter = 0
+        elif not in_operand:
+            if char in ALL_OPS:
+                if char in BINARY_OPS:
+                    operand_counter = 0
+                    dot_counter = 0
+                    continue
+                elif char in LEFT_UNARY_OPS:
+                    in_operand = True
+                    operand_counter += 1
+                    operand_part = OperandPart.Left
+                elif char in RIGHT_UNARY_OPS:
+                    return False
+            if char in OPERAND_CHARS:
+                in_operand = True
+                operand_counter += 1
+                operand_part = OperandPart.Middle
+
+        if operand_counter > 1:
+            return False
+        if dot_counter > 1:
+            return False
+        if index == (len(expr) - 1):
+            if char in LEFT_UNARY_OPS:
+                return False
+            if char in BINARY_OPS:
+                return False
 
     return True
-
-print(operationType('-', 0))
