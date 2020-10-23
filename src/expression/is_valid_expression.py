@@ -329,7 +329,7 @@ def isValidOperation(expr: str, index: int) -> Optional[bool]:
 
 
 def isExpression(expr: str) -> bool:
-    expr.strip()
+    expr = expr.strip()
 
     if not expr:
         return False
@@ -341,111 +341,103 @@ def isExpression(expr: str) -> bool:
         return False
 
     bracket_counter = 0
-    dot_counter = 0
     operand_counter = 0
+    dot_counter = 0
 
     in_operand = False
     operand_part = OperandPart.Left
-    complex_middle_part = False
+    in_complex_middle_part = False
     complex_middle_start_pos = None
-    complex_middle_end_pos = None
 
-    index = -1
-    while index < len(expr) - 1:
-        index += 1
+    index = 0
+    while index < len(expr):
         char = expr[index]
 
-        if char in BRACKETS or complex_middle_part:
+        if char in BRACKETS or in_complex_middle_part:
             if char == '(':
                 bracket_counter += 1
-            if char == ')':
+                if not in_operand:
+                    in_operand = True
+                    operand_part = OperandPart.Middle
+            elif char == ')':
                 bracket_counter -= 1
 
             if bracket_counter < 0:
                 return False
 
-            if bracket_counter == 1:
-                if not complex_middle_part:
-                    complex_middle_start_pos = index
-                complex_middle_part = True
+            if bracket_counter == 1 and not in_complex_middle_part:
+                complex_middle_start_pos = index
+                in_complex_middle_part = True
             if bracket_counter == 0:
-                complex_middle_part = False
-                complex_middle_end_pos = index
-                if isExpression(expr[complex_middle_start_pos + 1:complex_middle_end_pos]):
-                    index = complex_middle_end_pos
-                    operand_part = OperandPart.Right
-                    in_operand = True
-                else:
+                in_complex_middle_part = False
+                # Brackets stricted
+                complex_middle_part = expr[complex_middle_start_pos + 1:index]
+
+                if not isExpression(complex_middle_part):
                     return False
 
-            if index == (len(expr) - 1) and bracket_counter > 0:
-                return False
+                operand_part = OperandPart.Right
 
+            index += 1
             continue
-
-        if index == 0:
-            if char not in LEFT_UNARY_OPS and char not in OPERAND_CHARS:
-                return False
-            else:
-                in_operand = True
-                operand_counter += 1
-                operand_part = OperandPart.Left
-
-        if char == ' ':
-            if operand_part is OperandPart.Left:
-                return False
-            if operand_part is OperandPart.Middle:
-                in_operand = False
-            if operand_part is OperandPart.Right:
-                in_operand = False
 
         if in_operand:
             if char == '.':
                 dot_counter += 1
-            if char in OPERAND_CHARS and operand_part is OperandPart.Left:
-                operand_part = OperandPart.Middle
-            if char in OPERAND_CHARS and operand_part is OperandPart.Right:
-                return False
-            if char in ALL_OPS:
-                if operand_part is OperandPart.Left and char not in LEFT_UNARY_OPS:
+                
+                if dot_counter > 1:
                     return False
-                if operand_part is OperandPart.Middle and char in BINARY_OPS:
-                    in_operand = False
-                    dot_counter = 0
-                    operand_counter = 0
-                if operand_part is OperandPart.Middle and char in ALWAYS_LEFT_UNARY:
+
+            if char in OPERAND_CHARS:
+                if operand_part is OperandPart.Left:
+                    operand_part = OperandPart.Middle
+                if operand_part is OperandPart.Right:
                     return False
-                if operand_part is OperandPart.Right and char in ALWAYS_LEFT_UNARY:
+            elif char in ALL_OPS:
+                if operand_part is OperandPart.Left:
+                    if char not in LEFT_UNARY_OPS:
+                        return False
+                if operand_part is OperandPart.Middle:
+                    if char in BINARY_OPS:
+                        in_operand = False
+                        dot_counter = 0
+                        operand_counter = 0
+                    if char in ALWAYS_LEFT_UNARY:
+                        return False
+                if operand_part is OperandPart.Right:
+                    if char in ALWAYS_LEFT_UNARY:
+                        return False
+                    if char in BINARY_OPS:
+                        in_operand = False
+                        dot_counter = 0
+                        operand_counter = 0
+            elif char == ' ':
+                if operand_part is OperandPart.Left:
                     return False
-                if operand_part is OperandPart.Right and char in BINARY_OPS:
-                    in_operand = False
-                    dot_counter = 0
-                    operand_counter = 0
-        elif not in_operand:
+
+                in_operand = False
+        else:
             if char in ALL_OPS:
                 if char in BINARY_OPS:
                     operand_counter = 0
                     dot_counter = 0
-                    continue
                 elif char in LEFT_UNARY_OPS:
                     in_operand = True
                     operand_counter += 1
                     operand_part = OperandPart.Left
                 elif char in RIGHT_UNARY_OPS:
                     return False
-            if char in OPERAND_CHARS:
+            elif char in OPERAND_CHARS:
                 in_operand = True
                 operand_counter += 1
                 operand_part = OperandPart.Middle
 
         if operand_counter > 1:
             return False
-        if dot_counter > 1:
-            return False
-        if index == (len(expr) - 1):
-            if char in LEFT_UNARY_OPS:
-                return False
-            if char in BINARY_OPS:
-                return False
+
+        index += 1
+
+    if bracket_counter > 0:
+        return False
 
     return True
