@@ -9,8 +9,8 @@ BINARY_OPS = set('+-*/^')
 BRACKETS = set('()')
 ALWAYS_BINARY_OPS = BINARY_OPS - (RIGHT_UNARY_OPS | LEFT_UNARY_OPS)
 ALL_OPS = BINARY_OPS | LEFT_UNARY_OPS | RIGHT_UNARY_OPS
-OPERAND_CHARS = set('0123456789.') | BRACKETS
-VALID_CHARS = OPERAND_CHARS | ALL_OPS
+MIDDLE_OPERAND_PART_CHARS = set('0123456789. ') | BRACKETS
+VALID_CHARS = MIDDLE_OPERAND_PART_CHARS | ALL_OPS
 
 
 class ScanDirection(IntEnum):
@@ -298,7 +298,7 @@ def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
     try:
         # Удаление всех операций из операнда
         if set(operand).intersection(ALL_OPS):
-            return isExpression(operand)
+            return isValidExpression(operand)
         float(operand)
         return True
     except ValueError:
@@ -328,7 +328,7 @@ def isValidOperation(expr: str, index: int) -> Optional[bool]:
     return all(operands)
 
 
-def isExpression(expr: str) -> bool:
+def isValidExpression(expr: str) -> bool:
     expr = expr.strip()
 
     if not expr:
@@ -343,6 +343,7 @@ def isExpression(expr: str) -> bool:
     bracket_counter = 0
     operand_counter = 0
     dot_counter = 0
+    middle_chars_counter = 0
 
     in_operand = False
     operand_part = OperandPart.Left
@@ -352,13 +353,20 @@ def isExpression(expr: str) -> bool:
     index = 0
     while index < len(expr):
         char = expr[index]
+        print(f'Char: {char}')
+        print(f'In operand: {in_operand}')
+        print(f'Operand part: {operand_part.name}')
 
-        if char in BRACKETS or in_complex_middle_part:
+        if char in BRACKETS:
             if char == '(':
                 bracket_counter += 1
                 if not in_operand:
                     in_operand = True
                     operand_part = OperandPart.Middle
+                    operand_counter += 1
+                else:
+                    if operand_part is OperandPart.Middle:
+                        return False
             elif char == ')':
                 bracket_counter -= 1
 
@@ -368,68 +376,87 @@ def isExpression(expr: str) -> bool:
             if bracket_counter == 1 and not in_complex_middle_part:
                 complex_middle_start_pos = index
                 in_complex_middle_part = True
+
             if bracket_counter == 0:
                 in_complex_middle_part = False
                 # Brackets stricted
                 complex_middle_part = expr[complex_middle_start_pos + 1:index]
 
-                if not isExpression(complex_middle_part):
+                if not isValidExpression(complex_middle_part):
                     return False
 
                 operand_part = OperandPart.Right
-
             index += 1
             continue
 
         if in_operand:
-            if char == '.':
-                dot_counter += 1
-                
-                if dot_counter > 1:
-                    return False
-
-            if char in OPERAND_CHARS:
-                if operand_part is OperandPart.Left:
-                    operand_part = OperandPart.Middle
-                if operand_part is OperandPart.Right:
-                    return False
-            elif char in ALL_OPS:
+            if char in ALL_OPS:
                 if operand_part is OperandPart.Left:
                     if char not in LEFT_UNARY_OPS:
                         return False
-                if operand_part is OperandPart.Middle:
-                    if char in BINARY_OPS:
-                        in_operand = False
-                        dot_counter = 0
-                        operand_counter = 0
+                elif operand_part is OperandPart.Middle:
+                    if in_complex_middle_part:
+                        index += 1
+                        continue
+
                     if char in ALWAYS_LEFT_UNARY:
                         return False
-                if operand_part is OperandPart.Right:
+                    elif char in BINARY_OPS:
+                        in_operand = False
+                        operand_counter = 0
+                        middle_chars_counter = 0
+                    elif char in RIGHT_UNARY_OPS:
+                        operand_part = OperandPart.Right
+                    middle_chars_counter += 1
+                elif operand_part is OperandPart.Right:
                     if char in ALWAYS_LEFT_UNARY:
                         return False
-                    if char in BINARY_OPS:
+                    elif char in BINARY_OPS:
                         in_operand = False
-                        dot_counter = 0
                         operand_counter = 0
+                        middle_chars_counter = 0
             elif char == ' ':
                 if operand_part is OperandPart.Left:
                     return False
+                else:
+                    in_operand = False
+            elif char in MIDDLE_OPERAND_PART_CHARS:
+                if operand_part is OperandPart.Left:
+                    operand_part = OperandPart.Middle
+                    middle_chars_counter += 1
+                elif operand_part is OperandPart.Right:
+                    return False
 
-                in_operand = False
-        else:
+            if char == '.':
+                if operand_part is OperandPart.Middle:
+                    dot_counter += 1
+                    middle_chars_counter += 1
+
+                    if dot_counter > 1:
+                        return False
+                else:
+                    return False
+
+        else:  # not in_operand:
             if char in ALL_OPS:
-                if char in BINARY_OPS:
-                    operand_counter = 0
-                    dot_counter = 0
-                elif char in LEFT_UNARY_OPS:
+                if char in ALWAYS_LEFT_UNARY:
                     in_operand = True
                     operand_counter += 1
                     operand_part = OperandPart.Left
-                elif char in RIGHT_UNARY_OPS:
+                    dot_counter = 0
+                elif char in BINARY_OPS:
+                    if operand_counter == 1:
+                        operand_counter = 0
+                        middle_chars_counter = 0
+                    else:
+                        return False
+                else:
                     return False
-            elif char in OPERAND_CHARS:
+            elif char in MIDDLE_OPERAND_PART_CHARS:
+                middle_chars_counter += 1
                 in_operand = True
                 operand_counter += 1
+                dot_counter = 0
                 operand_part = OperandPart.Middle
 
         if operand_counter > 1:
@@ -437,7 +464,23 @@ def isExpression(expr: str) -> bool:
 
         index += 1
 
+    print()
+    print(f'Last In operand: {in_operand}')
+    print(f'Last Operand part: {operand_part.name}')
+    print(f'Last Bracket count: {bracket_counter}')
+    print(f'Last Operand count: {operand_counter}')
+    print()
+
     if bracket_counter > 0:
         return False
 
+    if operand_counter == 0:
+        return False
+
+    if operand_part is OperandPart.Left:
+        return False
+
     return True
+
+
+print(isValidExpression('1-2- 12'))
