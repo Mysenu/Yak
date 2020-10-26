@@ -343,7 +343,6 @@ def isValidExpression(expr: str) -> bool:
     bracket_counter = 0
     operand_counter = 0
     dot_counter = 0
-    middle_chars_counter = 0
 
     in_operand = False
     operand_part = OperandPart.Left
@@ -390,11 +389,16 @@ def isValidExpression(expr: str) -> bool:
             continue
 
         if in_operand:
-            if char in ALL_OPS:
-                if operand_part is OperandPart.Left:
+            if operand_part is OperandPart.Left:
+                if char in ALL_OPS:
                     if char not in LEFT_UNARY_OPS:
                         return False
-                elif operand_part is OperandPart.Middle:
+                elif char == ' ':
+                    return False
+                elif char in MIDDLE_OPERAND_PART_CHARS:
+                    operand_part = OperandPart.Middle
+            elif operand_part is OperandPart.Middle:
+                if char in ALL_OPS:
                     if in_complex_middle_part:
                         index += 1
                         continue
@@ -404,33 +408,28 @@ def isValidExpression(expr: str) -> bool:
                     elif char in BINARY_OPS:
                         in_operand = False
                         operand_counter = 0
-                        middle_chars_counter = 0
                     elif char in RIGHT_UNARY_OPS:
                         operand_part = OperandPart.Right
-                    middle_chars_counter += 1
-                elif operand_part is OperandPart.Right:
-                    if char in ALWAYS_LEFT_UNARY:
-                        return False
-                    elif char in BINARY_OPS:
-                        in_operand = False
-                        operand_counter = 0
-                        middle_chars_counter = 0
-            elif char == ' ':
-                if operand_part is OperandPart.Left:
-                    return False
-                else:
+                elif char == ' ':
                     in_operand = False
-            elif char in MIDDLE_OPERAND_PART_CHARS:
-                if operand_part is OperandPart.Left:
-                    operand_part = OperandPart.Middle
-                    middle_chars_counter += 1
-                elif operand_part is OperandPart.Right:
+                elif char in MIDDLE_OPERAND_PART_CHARS:
+                    pass
+            elif operand_part is OperandPart.Right:
+                if char in ALL_OPS:
+                    if operand_part is OperandPart.Right:
+                        if char in ALWAYS_LEFT_UNARY:
+                            return False
+                        elif char in BINARY_OPS:
+                            in_operand = False
+                            operand_counter = 0
+                elif char == ' ':
+                    in_operand = False
+                elif char in MIDDLE_OPERAND_PART_CHARS:
                     return False
 
             if char == '.':
                 if operand_part is OperandPart.Middle:
                     dot_counter += 1
-                    middle_chars_counter += 1
 
                     if dot_counter > 1:
                         return False
@@ -439,7 +438,7 @@ def isValidExpression(expr: str) -> bool:
 
         else:  # not in_operand:
             if char in ALL_OPS:
-                if char in ALWAYS_LEFT_UNARY:
+                if char in LEFT_UNARY_OPS:
                     in_operand = True
                     operand_counter += 1
                     operand_part = OperandPart.Left
@@ -447,13 +446,11 @@ def isValidExpression(expr: str) -> bool:
                 elif char in BINARY_OPS:
                     if operand_counter == 1:
                         operand_counter = 0
-                        middle_chars_counter = 0
                     else:
                         return False
                 else:
                     return False
             elif char in MIDDLE_OPERAND_PART_CHARS:
-                middle_chars_counter += 1
                 in_operand = True
                 operand_counter += 1
                 dot_counter = 0
@@ -483,4 +480,4 @@ def isValidExpression(expr: str) -> bool:
     return True
 
 
-print(isValidExpression('1-2- 12'))
+print(isValidExpression('1-.'))
