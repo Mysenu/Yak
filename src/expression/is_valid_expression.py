@@ -355,6 +355,7 @@ def isValidExpression(expr: str) -> bool:
         print(f'Char: {char}')
         print(f'In operand: {in_operand}')
         print(f'Operand part: {operand_part.name}')
+        print(f'Operand counter: {operand_counter}')
 
         if char in BRACKETS:
             if char == '(':
@@ -439,11 +440,15 @@ def isValidExpression(expr: str) -> bool:
         else:  # not in_operand:
             if char in ALL_OPS:
                 if char in LEFT_UNARY_OPS:
-                    in_operand = True
-                    operand_counter += 1
-                    operand_part = OperandPart.Left
-                    dot_counter = 0
-                elif char in BINARY_OPS:
+                    if operand_counter == 0:
+                        in_operand = True
+                        operand_counter += 1
+                        operand_part = OperandPart.Left
+                        dot_counter = 0
+                    else:
+                        pass
+
+                if char in BINARY_OPS:
                     if operand_counter == 1:
                         operand_counter = 0
                     else:
@@ -480,4 +485,4 @@ def isValidExpression(expr: str) -> bool:
     return True
 
 
-print(isValidExpression('1-.'))
+print(isValidExpression('1- 2 2'))
