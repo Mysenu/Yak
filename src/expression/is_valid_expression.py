@@ -343,6 +343,7 @@ def isValidExpression(expr: str) -> bool:
     bracket_counter = 0
     operand_counter = 0
     dot_counter = 0
+    middle_chars_counter = 0
 
     in_operand = False
     operand_part = OperandPart.Left
@@ -352,10 +353,6 @@ def isValidExpression(expr: str) -> bool:
     index = 0
     while index < len(expr):
         char = expr[index]
-        print(f'Char: {char}')
-        print(f'In operand: {in_operand}')
-        print(f'Operand part: {operand_part.name}')
-        print(f'Operand counter: {operand_counter}')
 
         if char in BRACKETS:
             if char == '(':
@@ -398,6 +395,7 @@ def isValidExpression(expr: str) -> bool:
                     return False
                 elif char in MIDDLE_OPERAND_PART_CHARS:
                     operand_part = OperandPart.Middle
+                    middle_chars_counter = 1
             elif operand_part is OperandPart.Middle:
                 if char in ALL_OPS:
                     if in_complex_middle_part:
@@ -414,7 +412,11 @@ def isValidExpression(expr: str) -> bool:
                 elif char == ' ':
                     in_operand = False
                 elif char in MIDDLE_OPERAND_PART_CHARS:
-                    pass
+                    middle_chars_counter += 1
+
+                if dot_counter == 1 and middle_chars_counter == 1:
+                    return False
+
             elif operand_part is OperandPart.Right:
                 if char in ALL_OPS:
                     if operand_part is OperandPart.Right:
@@ -460,18 +462,18 @@ def isValidExpression(expr: str) -> bool:
                 operand_counter += 1
                 dot_counter = 0
                 operand_part = OperandPart.Middle
+                middle_chars_counter = 1
+
+                if char == '.':
+                    dot_counter = 1
+
+                if char == ' ':
+                    middle_chars_counter = 0
 
         if operand_counter > 1:
             return False
 
         index += 1
-
-    print()
-    print(f'Last In operand: {in_operand}')
-    print(f'Last Operand part: {operand_part.name}')
-    print(f'Last Bracket count: {bracket_counter}')
-    print(f'Last Operand count: {operand_counter}')
-    print()
 
     if bracket_counter > 0:
         return False
@@ -482,7 +484,9 @@ def isValidExpression(expr: str) -> bool:
     if operand_part is OperandPart.Left:
         return False
 
+    if dot_counter == 1 and middle_chars_counter == 1:
+        return False
+
     return True
 
 
-print(isValidExpression('1- 2 2'))
