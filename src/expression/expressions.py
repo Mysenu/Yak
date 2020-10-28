@@ -1,7 +1,7 @@
 from typing import Optional, Union
 from math import sqrt, pow
 
-from src.expression.is_valid_expression import findOperand, findOperands, ScanDirection, isExpression, VALID_CHARS
+from src.expression.is_valid_expression import findOperand, findOperands, ScanDirection, isValidExpression, VALID_CHARS
 
 
 def toPercent(value: Union[int, float]) -> float:
@@ -35,8 +35,7 @@ def convertToPyExpr(raw_expr: str) -> str:
 
 
 def calculate(expression: str) -> Optional[Union[int, float]]:
-    if not isExpression(expression):
-        print(1111)
+    if not isValidExpression(expression):
         return None
 
     if expression.strip():
@@ -50,5 +49,3 @@ def canBeAdded(char: str, expression: str, position: int) -> bool:
 if __name__ == '__main__':
     def testExpr(text):
         print(f'Source: {text} | Py: {convertToPyExpr(text)}')
-
-    print(convertToPyExpr('√(45^4-√(94^3-3)*45)'))
