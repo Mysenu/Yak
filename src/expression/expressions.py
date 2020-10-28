@@ -9,7 +9,10 @@ def toPercent(value: Union[int, float]) -> float:
 
 
 def convertToPyExpr(raw_expr: str) -> str:
-    for index, char in enumerate(raw_expr):
+    index = len(raw_expr) - 1
+
+    while index > 0:
+        char = raw_expr[index]
         if char == '√':
             func = 'sqrt'
             sub_expr = findOperand(raw_expr, index)
@@ -26,9 +29,11 @@ def convertToPyExpr(raw_expr: str) -> str:
             sub_expr = findOperand(raw_expr, index, ScanDirection.Left)
             start, end = sub_expr.start, sub_expr.end + 1
         else:
+            index -= 1
             continue
 
         expr = f'{raw_expr[:start]}{func}({sub_expr}){raw_expr[end:]}'
+        index -= 1
         return convertToPyExpr(expr)
     else:
         return raw_expr
