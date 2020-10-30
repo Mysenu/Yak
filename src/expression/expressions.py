@@ -2,6 +2,7 @@ from typing import Optional, Union
 from math import sqrt, pow
 
 from src.expression.is_valid_expression import findOperand, findOperands, ScanDirection, isValidExpression, VALID_CHARS
+from is_valid_expression import RIGHT_UNARY_OPS
 
 
 def toPercent(value: Union[int, float]) -> float:
@@ -9,10 +10,27 @@ def toPercent(value: Union[int, float]) -> float:
 
 
 def convertToPyExpr(raw_expr: str) -> str:
-    index = len(raw_expr) - 1
+    index = 0
+    step_counter = 0
 
-    while index > 0:
+    while index < len(raw_expr):
         char = raw_expr[index]
+        next_char = None
+
+        if index + 1 < len(raw_expr):
+            next_char = raw_expr[index + 1]
+
+        if char in RIGHT_UNARY_OPS:
+            index += 1
+            if next_char:
+                step_counter += 1
+                continue
+
+        if step_counter:
+            step_counter -= 1
+            index -= 1
+            char = raw_expr[index]
+
         if char == '√':
             func = 'sqrt'
             sub_expr = findOperand(raw_expr, index)
@@ -29,11 +47,11 @@ def convertToPyExpr(raw_expr: str) -> str:
             sub_expr = findOperand(raw_expr, index, ScanDirection.Left)
             start, end = sub_expr.start, sub_expr.end + 1
         else:
-            index -= 1
+            index += 1
             continue
 
         expr = f'{raw_expr[:start]}{func}({sub_expr}){raw_expr[end:]}'
-        index -= 1
+        index += 1
         return convertToPyExpr(expr)
     else:
         return raw_expr
