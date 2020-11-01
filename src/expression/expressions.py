@@ -10,24 +10,21 @@ def toPercent(value: Union[int, float]) -> float:
 
 
 def convertToPyExpr(raw_expr: str) -> str:
+    in_right_part = False
+
     index = 0
-    step_counter = 0
-
-    while index < len(raw_expr):
-        char = raw_expr[index]
-        next_char = None
-
-        if index + 1 < len(raw_expr):
-            next_char = raw_expr[index + 1]
+    while index <= len(raw_expr):
+        try:
+            char = raw_expr[index]
+        except IndexError:
+            char = None
 
         if char in RIGHT_UNARY_OPS:
+            in_right_part = True
             index += 1
-            if next_char:
-                step_counter += 1
-                continue
+            continue
 
-        if step_counter:
-            step_counter -= 1
+        if in_right_part:
             index -= 1
             char = raw_expr[index]
 
