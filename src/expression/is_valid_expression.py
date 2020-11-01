@@ -278,27 +278,12 @@ def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
     if isinstance(operand, SubExpression):
         operand = str(operand)
 
-    first_point = False
-    if operand[0] == '0':
-        for char in operand:
-            if char == '.':
-                first_point = True
-            elif char == '.' and first_point:
-                return False
-
-            if char == '0' and not first_point:
-                continue
-            elif not first_point:
-                return False
-        else:
-            if first_point:
-                return True
-            return False
+    if set(operand).intersection(ALL_OPS):
+        return isValidExpression(operand)
+    elif operand.startswith('0') and '.' not in operand:
+        return False
 
     try:
-        # Удаление всех операций из операнда
-        if set(operand).intersection(ALL_OPS):
-            return isValidExpression(operand)
         float(operand)
         return True
     except ValueError:
@@ -416,7 +401,6 @@ def isValidExpression(expr: str) -> bool:
 
                 if dot_counter == 1 and middle_chars_counter == 1:
                     return False
-
             elif operand_part is OperandPart.Right:
                 if char in ALL_OPS:
                     if operand_part is OperandPart.Right:
@@ -488,5 +472,3 @@ def isValidExpression(expr: str) -> bool:
         return False
 
     return True
-
-
