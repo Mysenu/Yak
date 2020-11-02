@@ -439,7 +439,8 @@ def isValidExpression(expr: str) -> bool:
                         operand_counter = 0
                     else:
                         return False
-                else:
+
+                if char in RIGHT_UNARY_OPS:
                     return False
             elif char in MIDDLE_OPERAND_PART_CHARS:
                 in_operand = True
