@@ -339,20 +339,20 @@ def isValidExpression(expr: str) -> bool:
     while index < len(expr):
         char = expr[index]
 
-        if char in BRACKETS or in_complex_middle_part:
+        if char in BRACKETS:
             if char == '(':
                 bracket_counter += 1
                 if not in_operand:
+                    if operand_counter != 0:
+                        return False
+
                     in_operand = True
                     operand_part = OperandPart.Middle
                     operand_counter += 1
-                else:
-                    prev_char_bracket, prev_index = False, index - 1
-                    if prev_index >= 0 and expr[prev_index] == '(':
-                        prev_char_bracket = True
-
-                    if operand_part is OperandPart.Middle and not prev_char_bracket:
+                else:  # if in_operand
+                    if operand_part is OperandPart.Middle and not in_complex_middle_part:
                         return False
+
             elif char == ')':
                 bracket_counter -= 1
                 if in_operand:
@@ -389,6 +389,10 @@ def isValidExpression(expr: str) -> bool:
                     operand_part = OperandPart.Middle
                     middle_chars_counter = 1
             elif operand_part is OperandPart.Middle:
+                if in_complex_middle_part:
+                    index += 1
+                    continue
+
                 if char in ALL_OPS:
                     if char in ALWAYS_LEFT_UNARY:
                         return False
@@ -435,7 +439,7 @@ def isValidExpression(expr: str) -> bool:
                         operand_part = OperandPart.Left
                         dot_counter = 0
                     else:
-                        pass
+                        return False
 
                 if char in BINARY_OPS:
                     if operand_counter == 1:
@@ -447,7 +451,7 @@ def isValidExpression(expr: str) -> bool:
                     return False
             elif char in MIDDLE_OPERAND_PART_CHARS:
                 if char == '.':
-                    dot_counter = 1
+                    dot_counter += 1
                 elif char == ' ':
                     middle_chars_counter = 0
                 else:
