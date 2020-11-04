@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLin
 
 from src.core.core import saveHistoryToFile
 from src.expression.expressions import calculate, canBeAdded
-from src.expression.is_valid_expression import isExpression
+from src.expression.is_valid_expression import isValidExpression
 from src.history.history_list import HistoryListModel
 
 
@@ -51,10 +51,10 @@ class ExpressionField(QLineEdit):
             self.clear()
 
         if event.matches(QKeySequence.Paste):
-            pass
+            super(ExpressionField, self).keyPressEvent(event)
 
         if event.matches(QKeySequence.Copy):
-            pass
+            super(ExpressionField, self).keyPressEvent(event)
 
     @property
     def valid_keys(self):
@@ -317,7 +317,7 @@ class MainWindow(QWidget):
     def _addExpressionToHistory(self):
         expr = self.entry_field.text()
 
-        if not isExpression(expr):
+        if not isValidExpression(expr):
             return
 
         history_length = self.history_list_model.rowCount(QModelIndex())
