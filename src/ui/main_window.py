@@ -56,6 +56,9 @@ class ExpressionField(QLineEdit):
         if event.matches(QKeySequence.Copy):
             super(ExpressionField, self).keyPressEvent(event)
 
+        if event.matches(QKeySequence.SelectAll):
+            super(ExpressionField, self).keyPressEvent(event)
+
     @property
     def valid_keys(self):
         return self._valid_keys
