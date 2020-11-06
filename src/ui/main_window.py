@@ -1,17 +1,16 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QListView, qApp, QSizePolicy, \
-    QFileDialog, QGridLayout
+    QFileDialog, QGridLayout, QApplication
 
 from src.core.core import saveHistoryToFile
-from src.expression.expressions import calculate, canBeAdded
-from src.expression.is_valid_expression import isValidExpression
+from src.expression.expressions import calculate
+from src.expression.is_valid_expression import isValidExpression, VALID_CHARS
 from src.history.history_list import HistoryListModel
 
 
 class ExpressionField(QLineEdit):
-    _valid_characters = '0123456789+-/*.()vV√^% '
-    _valid_keys = {Qt.Key_Backspace, Qt.Key_Enter, Qt.Key_Return,
+    _valid_keys = {Qt.Key_Backspace, Qt.Key_Enter, Qt.Key_Return, Qt.Key_C, Qt.Key_V, Qt.Key_X,
                    Qt.Key_Right, Qt.Key_Left, Qt.Key_Delete, Qt.Key_Home, Qt.Key_End}
 
     def __init__(self):
@@ -35,29 +34,45 @@ class ExpressionField(QLineEdit):
             self.setCursorPosition(max(position - 1, 0))
         self.blockSignals(False)
 
+    def canBeAdded(self, text: str, expression: str = None, position: int = None) -> bool:
+        return not (set(text) - VALID_CHARS)
+
+    def insert(self, text: str) -> None:
+        text = text.lower().replace('v', '√')
+
+        if self.canBeAdded(text):
+            super().insert(text)
+
     def keyPressEvent(self, event: QKeyEvent):
-        key = event.key()
         text = event.text()
-        expression = self.text()
-        position = self.cursorPosition()
+        if not (set(text) - VALID_CHARS) and event.modifiers() in (Qt.NoModifier, Qt.ShiftModifier):
+            self.insert(text)
+        elif event.key() in self._valid_keys:
+            if event.matches(QKeySequence.Cancel):
+                self.clear()
+            elif event.matches(QKeySequence.Copy):
+                if not self.text():
+                    return
 
-        if text.lower() == 'v' and canBeAdded('√', expression, position):
-            self.insert('√')
-        elif canBeAdded(text, expression, position):
-            super(ExpressionField, self).keyPressEvent(event)
-        elif key in ExpressionField._valid_keys:
-            super(ExpressionField, self).keyPressEvent(event)
-        elif event.matches(QKeySequence.Cancel):
-            self.clear()
+                if self.selectedText():
+                    text_to_copy = self.selectedText()
+                else:
+                    text_to_copy = self.text()
 
-        if event.matches(QKeySequence.Paste):
-            super(ExpressionField, self).keyPressEvent(event)
+                text_to_copy = text_to_copy.replace('√', 'v')
 
-        if event.matches(QKeySequence.Copy):
-            super(ExpressionField, self).keyPressEvent(event)
+                clipboard = QApplication.clipboard()
+                clipboard.setText(text_to_copy)
+            elif event.matches(QKeySequence.Paste):
+                clipboard = QApplication.clipboard()
+                text = clipboard.text()
 
-        if event.matches(QKeySequence.SelectAll):
-            super(ExpressionField, self).keyPressEvent(event)
+                if not text:
+                    return
+
+                self.insert(text.strip())
+            else:
+                super().keyPressEvent(event)
 
     @property
     def valid_keys(self):
@@ -270,27 +285,6 @@ class MainWindow(QWidget):
 
         self.show()
 
-    def keyPressEvent(self, event: QKeyEvent):
-        key = event.key()
-        text = event.text()
-        expression = self.entry_field.text()
-        position = self.entry_field.cursorPosition()
-
-        if text.lower() == 'v' and canBeAdded('√', expression, position):
-            self.entry_field.insert('√')
-        elif canBeAdded(text, expression, position):
-            super(ExpressionField, self.entry_field).keyPressEvent(event)
-        elif key in self.entry_field.valid_keys:
-            super(ExpressionField, self.entry_field).keyPressEvent(event)
-        elif event.matches(QKeySequence.Cancel):
-            self.entry_field.clear()
-
-        if event.matches(QKeySequence.Paste):
-            pass
-
-        if event.matches(QKeySequence.Copy):
-            pass
-
     def _saveHistoryButton(self):
         if not self.history_list_model.notEmptyList():
             return
@@ -308,9 +302,7 @@ class MainWindow(QWidget):
 
     def _onButtonClick(self):
         char_to_add = qApp.sender().text()
-        expression = self.entry_field.text()
-        if canBeAdded(char_to_add, expression, self.entry_field.cursorPosition()):
-            self.entry_field.insert(char_to_add)
+        self.entry_field.insert(char_to_add)
 
     def _calculateCurrentExpression(self):
         result = calculate(self.entry_field.text())
