@@ -395,7 +395,7 @@ def isValidExpression(expr: str) -> bool:
                         starts_zero = True
                     elif char == '.':
                         starts_zero = False
-                    else:
+                    elif char in MIDDLE_OPERAND_PART_CHARS:
                         return False
 
                 if in_complex_middle_part:
