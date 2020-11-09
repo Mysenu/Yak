@@ -1,6 +1,6 @@
 import typing
 
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt
+from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData, QByteArray, QDataStream, QIODevice
 
 from src.expression.expressions import calculate
 
@@ -48,3 +48,73 @@ class HistoryListModel(QAbstractListModel):
             equation.append(f'{expression} = {calculate(expression)}')
 
         return equation
+
+    def insertRows(self, row: int, count: int, parent: QModelIndex = ...) -> bool:
+        self.beginInsertRows(parent, row, row + count - 1)
+        self._expressions.insert(row, self._expressions[row - 1])
+        self.endInsertRows()
+        return True
+
+    def removeRows(self, row: int, count: int, parent: QModelIndex = ...) -> bool:
+        self.beginRemoveRows(parent, row, row + count + 1)
+        self._expressions.pop(row)
+        self.endRemoveRows()
+        return True
+
+    def setData(self, index: QModelIndex, value: typing.Any, role: int = ...) -> bool:
+        print(value)
+        if index.isValid() and role == Qt.DisplayRole:
+            self._expressions[index.row()] = value.decode('utf-8')
+            return True
+        return False
+
+    def flags(self, index):
+        if index.isValid():
+            return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled
+        else:
+            return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDropEnabled
+
+    def supportedDropActions(self):
+        return Qt.MoveAction
+
+    def mimeTypes(self):
+        return 'text/plain'
+
+    def canDropMimeData(self, data, action, row, column, parent):
+        return action == Qt.MoveAction and data.hasFormat('text/plain')
+
+    def mimeData(self, indexes):
+        mime_data = QMimeData()
+        encoded_data = QByteArray()
+        stream = QDataStream(encoded_data, QIODevice.WriteOnly)
+        for index in indexes:
+            if index.isValid():
+                stream.writeString(self.data(index, Qt.UserRole).encode('utf-8'))
+        mime_data.setData('text/plain', encoded_data)
+        return mime_data
+
+    def dropMimeData(self, data, action, row, column, parent):
+        if not self.canDropMimeData(data, action, row, column, parent):
+            return False
+
+        if action == Qt.IgnoreAction:
+            return True
+        elif action != Qt.MoveAction:
+            return False
+
+        encoded_data = data.data('text/plain')
+        stream = QDataStream(encoded_data, QIODevice.ReadOnly)
+        new_items = []
+        rows = 0
+
+        while not stream.atEnd():
+            new_items.append(stream.readString())
+            rows += 1
+
+        self.insertRows(row, rows, QModelIndex())
+        for text in new_items:
+            index = self.index(row, 0, QModelIndex())
+            self.setData(index, text, Qt.DisplayRole)
+            row += 1
+
+        return True
