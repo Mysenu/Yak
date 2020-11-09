@@ -1,6 +1,6 @@
 import typing
 
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData, QByteArray, QDataStream, QIODevice
+from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QTextStream
 
 from src.expression.expressions import calculate
 
@@ -62,9 +62,8 @@ class HistoryListModel(QAbstractListModel):
         return True
 
     def setData(self, index: QModelIndex, value: typing.Any, role: int = ...) -> bool:
-        print(value)
         if index.isValid() and role == Qt.DisplayRole:
-            self._expressions[index.row()] = value.decode('utf-8')
+            self._expressions[index.row()] = value
             return True
         return False
 
@@ -77,20 +76,14 @@ class HistoryListModel(QAbstractListModel):
     def supportedDropActions(self):
         return Qt.MoveAction
 
-    def mimeTypes(self):
-        return 'text/plain'
-
     def canDropMimeData(self, data, action, row, column, parent):
         return action == Qt.MoveAction and data.hasFormat('text/plain')
 
     def mimeData(self, indexes):
         mime_data = QMimeData()
-        encoded_data = QByteArray()
-        stream = QDataStream(encoded_data, QIODevice.WriteOnly)
         for index in indexes:
             if index.isValid():
-                stream.writeString(self.data(index, Qt.UserRole).encode('utf-8'))
-        mime_data.setData('text/plain', encoded_data)
+                mime_data.setText(self.data(index, Qt.UserRole))
         return mime_data
 
     def dropMimeData(self, data, action, row, column, parent):
@@ -103,18 +96,10 @@ class HistoryListModel(QAbstractListModel):
             return False
 
         encoded_data = data.data('text/plain')
-        stream = QDataStream(encoded_data, QIODevice.ReadOnly)
-        new_items = []
-        rows = 0
+        stream = QTextStream(encoded_data, QIODevice.ReadOnly)
 
-        while not stream.atEnd():
-            new_items.append(stream.readString())
-            rows += 1
-
-        self.insertRows(row, rows, QModelIndex())
-        for text in new_items:
-            index = self.index(row, 0, QModelIndex())
-            self.setData(index, text, Qt.DisplayRole)
-            row += 1
+        self.insertRow(row, QModelIndex())
+        index = self.index(row, 0, QModelIndex())
+        self.setData(index, stream.readAll(), Qt.DisplayRole)
 
         return True
