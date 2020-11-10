@@ -87,6 +87,9 @@ class HistoryListModel(QAbstractListModel):
         return mime_data
 
     def dropMimeData(self, data, action, row, column, parent):
+        if row < 0:
+            return False
+
         if not self.canDropMimeData(data, action, row, column, parent):
             return False
 
