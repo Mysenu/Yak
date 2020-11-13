@@ -1,19 +1,19 @@
 import typing
 
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QTextStream
+from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData
 
 from src.expression.expressions import calculate
 
 
 class HistoryListModel(QAbstractListModel):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super(HistoryListModel, self).__init__(parent)
 
         self._expressions = []
 
-    def addExpression(self, expr: str) -> None:
+    def addExpression(self, expr: str, index: int = 0) -> None:
         self.beginResetModel()
-        self._expressions.insert(0, expr)
+        self._expressions.insert(index, expr)
         self.endResetModel()
 
     def rowCount(self, parent: QModelIndex) -> int:
@@ -32,77 +32,71 @@ class HistoryListModel(QAbstractListModel):
         if role == Qt.UserRole:
             return expression
 
-    def clearData(self):
+    def clearData(self) -> None:
         self.beginResetModel()
         self._expressions.clear()
         self.endResetModel()
 
-    def notEmptyList(self):
-        if self._expressions:
-            return True
-        return False
-
-    def expressionsData(self):
-        equation = []
+    def equations(self) -> typing.List[str]:
+        equations_list = []
         for expression in self._expressions:
-            equation.append(f'{expression} = {calculate(expression)}')
-
-        return equation
+            equations_list.append(f'{expression} = {calculate(expression)}')
+        return equations_list
 
     def insertRows(self, row: int, count: int, parent: QModelIndex = ...) -> bool:
         self.beginInsertRows(parent, row, row + count - 1)
-        self._expressions.insert(row, self._expressions[row - 1])
+        for _ in range(count):
+            self._expressions.insert(row, None)
         self.endInsertRows()
         return True
 
     def removeRows(self, row: int, count: int, parent: QModelIndex = ...) -> bool:
-        self.beginRemoveRows(parent, row, row + count + 1)
-        self._expressions.pop(row)
+        self.beginRemoveRows(parent, row, row + count - 1)
+        del self._expressions[row:row + count]
         self.endRemoveRows()
         return True
 
     def setData(self, index: QModelIndex, value: typing.Any, role: int = ...) -> bool:
-        if index.isValid() and role == Qt.DisplayRole:
-            self._expressions[index.row()] = value
-            return True
-        return False
+        if not index.isValid():
+            return False
 
-    def flags(self, index):
+        if role != Qt.DisplayRole:
+            return False
+
+        self._expressions[index.row()] = value
+        self.dataChanged.emit(index, index)
+        return True
+
+    def flags(self, index: QModelIndex) -> int:
         if index.isValid():
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled
         else:
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDropEnabled
 
-    def supportedDropActions(self):
+    def supportedDropActions(self) -> typing.Union[int, typing.Iterable[int]]:
         return Qt.MoveAction
 
-    def canDropMimeData(self, data, action, row, column, parent):
-        return action == Qt.MoveAction and data.hasFormat('text/plain')
+    def canDropMimeData(self, data: QMimeData, action: int, row: int, column: int, parent: QModelIndex) -> bool:
+        return action == Qt.MoveAction and data.hasText()
 
-    def mimeData(self, indexes):
+    def mimeData(self, indexes: typing.List[QModelIndex]) -> QMimeData:
         mime_data = QMimeData()
         for index in indexes:
             if index.isValid():
                 mime_data.setText(self.data(index, Qt.UserRole))
         return mime_data
 
-    def dropMimeData(self, data, action, row, column, parent):
-        if row < 0:
-            return False
-
+    def dropMimeData(self, data: QMimeData, action: int, row: int, column: int, parent: QModelIndex) -> bool:
         if not self.canDropMimeData(data, action, row, column, parent):
             return False
 
-        if action == Qt.IgnoreAction:
-            return True
-        elif action != Qt.MoveAction:
-            return False
+        if row < 0:
+            row = self.rowCount(QModelIndex())
+            self.insertRow(row, QModelIndex())
+        else:
+            self.insertRow(row, QModelIndex())
 
-        encoded_data = data.data('text/plain')
-        stream = QTextStream(encoded_data, QIODevice.ReadOnly)
-
-        self.insertRow(row, QModelIndex())
         index = self.index(row, 0, QModelIndex())
-        self.setData(index, stream.readAll(), Qt.DisplayRole)
+        self.setData(index, data.text(), Qt.DisplayRole)
 
         return True
