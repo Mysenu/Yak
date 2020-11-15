@@ -1,6 +1,7 @@
 import typing
 
 from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData
+from PyQt5.QtWidgets import QApplication
 
 from src.expression.expressions import calculate
 
@@ -36,6 +37,27 @@ class HistoryListModel(QAbstractListModel):
         self.beginResetModel()
         self._expressions.clear()
         self.endResetModel()
+
+    def copySelectedEquation(self, index: QModelIndex) -> None:
+        text_to_copy = self.data(index, Qt.DisplayRole)
+        text_to_copy = text_to_copy.replace('√', 'V')
+
+        clipboard = QApplication.clipboard()
+        clipboard.setText(text_to_copy)
+
+    def copySelectedExpression(self, index: QModelIndex) -> None:
+        text_to_copy = self.data(index, Qt.UserRole)
+        text_to_copy = text_to_copy.replace('√', 'V')
+
+        clipboard = QApplication.clipboard()
+        clipboard.setText(text_to_copy)
+
+    def cutSelectedEquation(self, index: QModelIndex):
+        self.copySelectedEquation(index)
+        self.removeRow(index.row(), QModelIndex())
+
+    def editSelectedExpression(self, index: QModelIndex):
+        pass
 
     def equations(self) -> typing.List[str]:
         equations_list = []

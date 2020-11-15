@@ -2,7 +2,8 @@ from PyQt5 import QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QListView, qApp, QSizePolicy, \
-    QFileDialog, QGridLayout, QApplication
+    QFileDialog, QGridLayout, QApplication, QMenu
+from PyQt5.uic.properties import QtCore
 
 from src.core.core import saveHistoryToFile
 from src.expression.expressions import calculate
@@ -273,6 +274,8 @@ class MainWindow(QWidget):
         self.history_list_view.setMovement(QListView.Snap)
         history_layout.addWidget(self.history_list_view)
         self.history_list_view.doubleClicked.connect(self._setExpressionFromHistory)
+        self.history_list_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.history_list_view.customContextMenuRequested.connect(self.contextMenu)
 
         history_buttons_layout = QHBoxLayout()
         history_buttons_layout.setContentsMargins(0, 0, 0, 0)
@@ -308,6 +311,21 @@ class MainWindow(QWidget):
     def _clearHistoryButton(self):
         self.history_list_model.clearData()
 
+    def _deleteSelectedEquation(self, index: QModelIndex):
+        self.history_list_model.removeRow(index.row(), QModelIndex())
+
+    def _copySelectedEquation(self, index: QModelIndex):
+        self.history_list_model.copySelectedEquation(index)
+
+    def _copySelectedExpression(self, index: QModelIndex):
+        self.history_list_model.copySelectedExpression(index)
+
+    def _cutSelectedEquation(self, index: QModelIndex):
+        self.history_list_model.cutSelectedEquation(index)
+
+    def _editSelectedExpression(self, index: QModelIndex):
+        self.history_list_model.editSelectedExpression(index)
+
     def _onButtonClick(self):
         char_to_add = qApp.sender().text()
         self.entry_field.insert(char_to_add)
@@ -342,3 +360,35 @@ class MainWindow(QWidget):
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         pass
+
+    def contextMenu(self, pos):
+        menu = QMenu()
+        index = self.history_list_view.currentIndex()
+
+        if index.row() >= 0:
+            copy_equation = menu.addAction('Copy equation')
+            cut_equation = menu.addAction('Cut equation')
+            copy_expression = menu.addAction('Copy expression')
+            edit_expression = menu.addAction('Edit expression')
+            delete = menu.addAction('Delete')
+            action = menu.exec_(self.history_list_view.mapToGlobal(pos))
+
+            if action == delete:
+                self._deleteSelectedEquation(index)
+            elif action == copy_equation:
+                self._copySelectedEquation(index)
+            elif action == copy_expression:
+                self._copySelectedExpression(index)
+            elif action == cut_equation:
+                self._cutSelectedEquation(index)
+            elif action == edit_expression:
+                self._editSelectedExpression(index)
+        else:
+            clear_history = menu.addAction('Clear history')
+            save_history = menu.addAction('Save history')
+            action = menu.exec_(self.history_list_view.mapToGlobal(pos))
+
+            if action == save_history:
+                self._saveHistoryButton()
+            elif action == clear_history:
+                self._clearHistoryButton()
