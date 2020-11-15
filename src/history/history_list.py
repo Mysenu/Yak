@@ -83,7 +83,8 @@ class HistoryListModel(QAbstractListModel):
         mime_data = QMimeData()
         for index in indexes:
             if index.isValid():
-                mime_data.setText(self.data(index, Qt.UserRole))
+                text = self.data(index, Qt.UserRole).replace('√', 'V')
+                mime_data.setText(text)
         return mime_data
 
     def dropMimeData(self, data: QMimeData, action: int, row: int, column: int, parent: QModelIndex) -> bool:
@@ -97,6 +98,7 @@ class HistoryListModel(QAbstractListModel):
             self.insertRow(row, QModelIndex())
 
         index = self.index(row, 0, QModelIndex())
-        self.setData(index, data.text(), Qt.DisplayRole)
+        text = data.text().replace('V', '√')
+        self.setData(index, text, Qt.DisplayRole)
 
         return True

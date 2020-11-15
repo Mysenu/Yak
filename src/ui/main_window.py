@@ -1,3 +1,4 @@
+from PyQt5 import QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QListView, qApp, QSizePolicy, \
@@ -45,7 +46,7 @@ class ExpressionField(QLineEdit):
 
     def keyPressEvent(self, event: QKeyEvent):
         text = event.text()
-        if not (set(text) - VALID_CHARS) and event.modifiers() in (Qt.NoModifier, Qt.ShiftModifier):
+        if not (set(text) - (VALID_CHARS | set('vV'))) and event.modifiers() in (Qt.NoModifier, Qt.ShiftModifier):
             self.insert(text)
         elif event.key() in self._valid_keys:
             if event.matches(QKeySequence.Cancel):
@@ -72,7 +73,13 @@ class ExpressionField(QLineEdit):
 
                 self.insert(text.strip())
             else:
+                if event.key() in (Qt.Key_C, Qt.Key_V, Qt.Key_X):
+                    return
+
                 super().keyPressEvent(event)
+
+    def dropEvent(self, data: QtGui.QDropEvent) -> None:
+        self.insert(data.mimeData().text())
 
     @property
     def valid_keys(self):
@@ -263,6 +270,7 @@ class MainWindow(QWidget):
         self.history_list_model = HistoryListModel()
         self.history_list_view = QListView()
         self.history_list_view.setModel(self.history_list_model)
+        self.history_list_view.setMovement(QListView.Snap)
         history_layout.addWidget(self.history_list_view)
         self.history_list_view.doubleClicked.connect(self._setExpressionFromHistory)
 
@@ -286,7 +294,7 @@ class MainWindow(QWidget):
         self.show()
 
     def _saveHistoryButton(self):
-        if not self.history_list_model.notEmptyList():
+        if self.history_list_model.rowCount(QModelIndex()) == 0:
             return
 
         file_path, _ = QFileDialog.getSaveFileName(self, filter='*.txt')
@@ -294,7 +302,7 @@ class MainWindow(QWidget):
         if not file_path:
             return
 
-        expressions = self.history_list_model.expressionsData()
+        expressions = self.history_list_model.equations()
         saveHistoryToFile(expressions, file_path)
 
     def _clearHistoryButton(self):
