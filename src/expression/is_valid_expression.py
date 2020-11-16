@@ -335,6 +335,7 @@ def isValidExpression(expr: str) -> bool:
     in_complex_middle_part = False
     complex_middle_start_pos = None
     starts_zero = False
+    prev_char_is_root = False
 
     index = 0
     while index < len(expr):
@@ -382,6 +383,8 @@ def isValidExpression(expr: str) -> bool:
         if in_operand:
             if operand_part is OperandPart.Left:
                 if char in ALL_OPS:
+                    if prev_char_is_root and char == '-':
+                        return False
                     if char not in LEFT_UNARY_OPS:
                         return False
                 elif char == ' ':
@@ -389,6 +392,7 @@ def isValidExpression(expr: str) -> bool:
                 elif char in MIDDLE_OPERAND_PART_CHARS:
                     operand_part = OperandPart.Middle
                     middle_chars_counter = 1
+                    prev_char_is_root = False
             elif operand_part is OperandPart.Middle:
                 if starts_zero:
                     if char == '0':
@@ -447,6 +451,7 @@ def isValidExpression(expr: str) -> bool:
                         operand_counter += 1
                         operand_part = OperandPart.Left
                         dot_counter = 0
+                        prev_char_is_root = True
                     else:
                         return False
 
