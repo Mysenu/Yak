@@ -73,6 +73,20 @@ class ExpressionField(QLineEdit):
                     return
 
                 self.insert(text.strip())
+            elif event.matches(QKeySequence.Cut):
+                if not self.text():
+                    return
+
+                if self.selectedText():
+                    text_to_copy = self.selectedText()
+                else:
+                    text_to_copy = self.text()
+
+                self.clear()
+                text_to_copy = text_to_copy.replace('√', 'v')
+
+                clipboard = QApplication.clipboard()
+                clipboard.setText(text_to_copy)
             else:
                 if event.key() in (Qt.Key_C, Qt.Key_V, Qt.Key_X):
                     return
@@ -296,7 +310,7 @@ class MainWindow(QWidget):
 
         self.show()
 
-    def _saveHistoryButton(self):
+    def _saveHistoryButton(self) -> None:
         if self.history_list_model.rowCount(QModelIndex()) == 0:
             return
 
@@ -308,34 +322,34 @@ class MainWindow(QWidget):
         expressions = self.history_list_model.equations()
         saveHistoryToFile(expressions, file_path)
 
-    def _clearHistoryButton(self):
+    def _clearHistoryButton(self) -> None:
         self.history_list_model.clearData()
 
-    def _deleteSelectedEquation(self, index: QModelIndex):
+    def _deleteSelectedEquation(self, index: QModelIndex) -> None:
         self.history_list_model.removeRow(index.row(), QModelIndex())
 
-    def _copySelectedEquation(self, index: QModelIndex):
+    def _copySelectedEquation(self, index: QModelIndex) -> None:
         self.history_list_model.copySelectedEquation(index)
 
-    def _copySelectedExpression(self, index: QModelIndex):
+    def _copySelectedExpression(self, index: QModelIndex) -> None:
         self.history_list_model.copySelectedExpression(index)
 
-    def _cutSelectedEquation(self, index: QModelIndex):
+    def _cutSelectedEquation(self, index: QModelIndex) -> None:
         self.history_list_model.cutSelectedEquation(index)
 
-    def _editSelectedExpression(self, index: QModelIndex):
+    def _editSelectedExpression(self, index: QModelIndex) -> None:
         self.history_list_model.editSelectedExpression(index)
 
-    def _onButtonClick(self):
+    def _onButtonClick(self) -> None:
         char_to_add = qApp.sender().text()
         self.entry_field.insert(char_to_add)
 
-    def _calculateCurrentExpression(self):
+    def _calculateCurrentExpression(self) -> None:
         result = calculate(self.entry_field.text())
         if result is not None:
             self.entry_field.setText(str(result))
 
-    def _addExpressionToHistory(self):
+    def _addExpressionToHistory(self) -> None:
         expr = self.entry_field.text()
 
         if not isValidExpression(expr):
@@ -350,18 +364,24 @@ class MainWindow(QWidget):
 
         self.history_list_model.addExpression(expr)
 
-    def _onEvalButtonClick(self):
+    def _onEvalButtonClick(self) -> None:
         self._addExpressionToHistory()
         self._calculateCurrentExpression()
 
-    def _setExpressionFromHistory(self):
+    def _setExpressionFromHistory(self) -> None:
         expr = self.history_list_view.currentIndex().data(Qt.UserRole)
         self.entry_field.setText(expr)
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         pass
 
-    def contextMenu(self, pos):
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        index = self.history_list_view.currentIndex()
+
+        if event.matches(QKeySequence.Cut):
+            self._cutSelectedEquation(index)
+
+    def contextMenu(self, pos: QPoint) -> None:
         menu = QMenu()
         index = self.history_list_view.currentIndex()
 
