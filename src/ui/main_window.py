@@ -81,12 +81,20 @@ class ExpressionField(QLineEdit):
                     text_to_copy = self.selectedText()
                 else:
                     text_to_copy = self.text()
-
-                self.clear()
-                text_to_copy = text_to_copy.replace('√', 'v')
+                text_to_copy = text_to_copy.replace('√', 'V')
+                text = self.text()
 
                 clipboard = QApplication.clipboard()
                 clipboard.setText(text_to_copy)
+
+                if text_to_copy:
+                    start_index = text.index(text_to_copy)
+                    count = len(text_to_copy)
+                    end_index = start_index + count
+                    self.setText(text[:start_index] + text[end_index:])
+                    self.setCursorPosition(start_index)
+                else:
+                    self.clear()
             else:
                 if event.key() in (Qt.Key_C, Qt.Key_V, Qt.Key_X):
                     return
@@ -300,17 +308,17 @@ class MainWindow(QWidget):
         history_buttons_layout.addWidget(self.clear_history_button)
         self.clear_history_button.setMinimumSize(30, 25)
         self.clear_history_button.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
-        self.clear_history_button.clicked.connect(self._clearHistoryButton)
+        self.clear_history_button.clicked.connect(self._clearHistory)
 
         self.save_history_button = QPushButton('Save')
         history_buttons_layout.addWidget(self.save_history_button)
         self.save_history_button.setMinimumSize(30, 25)
         self.save_history_button.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
-        self.save_history_button.clicked.connect(self._saveHistoryButton)
+        self.save_history_button.clicked.connect(self._saveHistory)
 
         self.show()
 
-    def _saveHistoryButton(self) -> None:
+    def _saveHistory(self) -> None:
         if self.history_list_model.rowCount(QModelIndex()) == 0:
             return
 
@@ -322,7 +330,7 @@ class MainWindow(QWidget):
         expressions = self.history_list_model.equations()
         saveHistoryToFile(expressions, file_path)
 
-    def _clearHistoryButton(self) -> None:
+    def _clearHistory(self) -> None:
         self.history_list_model.clearData()
 
     def _deleteSelectedEquation(self, index: QModelIndex) -> None:
@@ -385,12 +393,16 @@ class MainWindow(QWidget):
         menu = QMenu()
         index = self.history_list_view.currentIndex()
 
-        if index.row() >= 0:
+        if index.isValid():
             copy_equation = menu.addAction('Copy equation')
             cut_equation = menu.addAction('Cut equation')
             copy_expression = menu.addAction('Copy expression')
             edit_expression = menu.addAction('Edit expression')
             delete = menu.addAction('Delete')
+
+            menu.addSeparator()
+            clear_history = menu.addAction('Clear history')
+            save_history = menu.addAction('Save history')
             action = menu.exec_(self.history_list_view.mapToGlobal(pos))
 
             if action == delete:
@@ -403,12 +415,7 @@ class MainWindow(QWidget):
                 self._cutSelectedEquation(index)
             elif action == edit_expression:
                 self._editSelectedExpression(index)
-        else:
-            clear_history = menu.addAction('Clear history')
-            save_history = menu.addAction('Save history')
-            action = menu.exec_(self.history_list_view.mapToGlobal(pos))
-
-            if action == save_history:
-                self._saveHistoryButton()
+            elif action == save_history:
+                self._saveHistory()
             elif action == clear_history:
-                self._clearHistoryButton()
+                self._clearHistory()
