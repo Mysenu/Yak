@@ -79,22 +79,14 @@ class ExpressionField(QLineEdit):
 
                 if self.selectedText():
                     text_to_copy = self.selectedText()
+                    super().keyPressEvent(event)
                 else:
                     text_to_copy = self.text()
+                    self.clear()
                 text_to_copy = text_to_copy.replace('√', 'V')
-                text = self.text()
 
                 clipboard = QApplication.clipboard()
                 clipboard.setText(text_to_copy)
-
-                if text_to_copy:
-                    start_index = text.index(text_to_copy)
-                    count = len(text_to_copy)
-                    end_index = start_index + count
-                    self.setText(text[:start_index] + text[end_index:])
-                    self.setCursorPosition(start_index)
-                else:
-                    self.clear()
             else:
                 if event.key() in (Qt.Key_C, Qt.Key_V, Qt.Key_X):
                     return
