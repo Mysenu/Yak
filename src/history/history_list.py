@@ -1,9 +1,12 @@
 import typing
 
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData, QPoint
+from PyQt5.QtGui import QKeyEvent, QKeySequence
+from PyQt5.QtWidgets import QApplication, QListView, QMenu, QFileDialog, QAbstractItemView
 
+from src.core.core import saveHistoryToFile
 from src.expression.expressions import calculate
+from src.expression.is_valid_expression import isValidExpression
 
 
 class HistoryListModel(QAbstractListModel):
@@ -33,31 +36,22 @@ class HistoryListModel(QAbstractListModel):
         if role == Qt.UserRole:
             return expression
 
-    def clearData(self) -> None:
+    def clear(self) -> None:
         self.beginResetModel()
         self._expressions.clear()
         self.endResetModel()
 
-    def copySelectedEquation(self, index: QModelIndex) -> None:
-        text_to_copy = self.data(index, Qt.DisplayRole)
-        text_to_copy = text_to_copy.replace('√', 'V')
+    def saveHistory(self) -> None:
+        if self.rowCount(QModelIndex()) == 0:
+            return
 
-        clipboard = QApplication.clipboard()
-        clipboard.setText(text_to_copy)
+        file_path, _ = QFileDialog.getSaveFileName(filter='*.txt')
 
-    def copySelectedExpression(self, index: QModelIndex) -> None:
-        text_to_copy = self.data(index, Qt.UserRole)
-        text_to_copy = text_to_copy.replace('√', 'V')
+        if not file_path:
+            return
 
-        clipboard = QApplication.clipboard()
-        clipboard.setText(text_to_copy)
-
-    def cutSelectedEquation(self, index: QModelIndex):
-        self.copySelectedEquation(index)
-        self.removeRow(index.row(), QModelIndex())
-
-    def editSelectedExpression(self, index: QModelIndex):
-        pass
+        expressions = self.equations()
+        saveHistoryToFile(expressions, file_path)
 
     def equations(self) -> typing.List[str]:
         equations_list = []
@@ -124,3 +118,90 @@ class HistoryListModel(QAbstractListModel):
         self.setData(index, text, Qt.DisplayRole)
 
         return True
+
+
+class HistoryListView(QListView):
+    def __init__(self, parent=None) -> None:
+        super(HistoryListView, self).__init__(parent)
+
+        self.setMovement(QListView.Snap)
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._contextMenu = None
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        index = self.currentIndex()
+
+        if event.matches(QKeySequence.Cut):
+            self._cutSelectedEquation(index)
+
+    def _deleteSelectedEquations(self) -> None:
+        for index in self.selectedIndexes():
+            self.model().removeRow(index.row(), QModelIndex())
+
+    def _clear(self) -> None:
+        self.model().clear()
+
+    def _copySelectedEquations(self) -> None:
+        text_to_copy = ''
+        for index in self.selectedIndexes():
+            text_to_copy += f'{self.model().data(index, Qt.DisplayRole)}/n'
+        text_to_copy = text_to_copy.replace('√', 'V')
+
+        clipboard = QApplication.clipboard()
+        clipboard.setText(text_to_copy)
+
+    def _copySelectedExpressions(self) -> None:
+        text_to_copy = ''
+        for index in self.selectedIndexes():
+            text_to_copy += f'{self.model().data(index, Qt.UserRole)}/n'
+        text_to_copy = text_to_copy.replace('√', 'V')
+
+        clipboard = QApplication.clipboard()
+        clipboard.setText(text_to_copy)
+
+    def _cutSelectedEquations(self) -> None:
+        self._copySelectedEquations()
+        self._deleteSelectedEquations()
+
+    def _editSelectedExpression(self) -> None:
+        pass
+
+    def contextMenu(self, pos: QPoint) -> None:
+        if not self._contextMenu:
+            self._contextMenu = QMenu()
+            self._contextMenu.addAction('Copy equations')
+            self._contextMenu.addAction('Cut equations')
+            self._contextMenu.addAction('Copy expressions')
+            self._contextMenu.addAction('Edit expressions')
+            self._contextMenu.addAction('Delete')
+
+            self._contextMenu.addSeparator()
+            self._contextMenu.addAction('Clear history')
+            self._contextMenu.addAction('Save history')
+
+        indexes = self.selectedIndexes()
+        if not indexes:
+            self._contextMenu.setDisabled(True)
+        elif len(indexes) == 1:
+            self._contextMenu.setDisabled(False)
+            self._contextMenu.actions()[3].setDisabled(True)
+        else:
+            self._contextMenu.setDisabled(False)
+        action = self._contextMenu.exec_(self.mapToGlobal(pos))
+        if action:
+            action_text = action.text()
+            if action_text == 'Delete':
+                self._deleteSelectedEquations()
+            elif action_text == 'Copy equations':
+                self._copySelectedEquations()
+            elif action_text == 'Copy expressions':
+                self._copySelectedExpressions()
+            elif action_text == 'Cut equations':
+                self._cutSelectedEquations()
+            elif action_text == 'Edit expressions':
+                self._editSelectedExpression()
+            elif action_text == 'Save history':
+                self.model().saveHustory()
+            elif action_text == 'Clear history':
+                self._clear()
