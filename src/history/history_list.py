@@ -136,7 +136,7 @@ class HistoryListView(QListView):
             self._cutSelectedEquation(index)
 
     def _deleteSelectedEquations(self) -> None:
-        for index in self.selectedIndexes():
+        for index in reversed(sorted(self.selectedIndexes(), key=QModelIndex.row)):
             self.model().removeRow(index.row(), QModelIndex())
 
     def _clear(self) -> None:
