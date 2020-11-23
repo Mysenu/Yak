@@ -13,13 +13,13 @@ class HistoryListView(QListView):
         self.customContextMenuRequested.connect(self.showContextMenu)
         self._context_menu = None
 
-        self.copy_equations = None
-        self.cut_equations = None
-        self.copy_expressions = None
-        self.edit_expressions = None
-        self.delete = None
-        self.clear = None
-        self.save = None
+        self._copy_equations = None
+        self._cut_equations = None
+        self._copy_expressions = None
+        self._edit_expressions = None
+        self._delete = None
+        self._clear = None
+        self._save = None
 
     def _deleteSelectedEquations(self) -> None:
         for index in reversed(sorted(self.selectedIndexes(), key=QModelIndex.row)):
@@ -56,24 +56,24 @@ class HistoryListView(QListView):
     def _createContextMenu(self) -> None:
         self._context_menu = QMenu()
 
-        self.copy_equations = self._context_menu.addAction('Copy equations')
-        self.cut_equations = self._context_menu.addAction('Cut equations')
-        self.copy_expressions = self._context_menu.addAction('Copy expressions')
-        self.edit_expressions = self._context_menu.addAction('Edit expressions')
-        self.delete = self._context_menu.addAction('Delete')
+        self._copy_equations = self._context_menu.addAction('Copy equations')
+        self._cut_equations = self._context_menu.addAction('Cut equations')
+        self._copy_expressions = self._context_menu.addAction('Copy expressions')
+        self._edit_expressions = self._context_menu.addAction('Edit expressions')
+        self._delete = self._context_menu.addAction('Delete')
 
         self._context_menu.addSeparator()
 
-        self.clear = self._context_menu.addAction('Clear')
-        self.save = self._context_menu.addAction('Save')
+        self._clear = self._context_menu.addAction('Clear')
+        self._save = self._context_menu.addAction('Save')
 
-        self.copy_equations.triggered.connect(self._copySelectedEquations)
-        self.cut_equations.triggered.connect(self._cutSelectedEquations)
-        self.copy_expressions.triggered.connect(self._copySelectedExpressions)
-        self.edit_expressions.triggered.connect(self._editSelectedExpression)
-        self.delete.triggered.connect(self._deleteSelectedEquations)
-        self.save.triggered.connect(self.model().saveHistory)
-        self.clear.triggered.connect(self._clear)
+        self._copy_equations.triggered.connect(self._copySelectedEquations)
+        self._cut_equations.triggered.connect(self._cutSelectedEquations)
+        self._copy_expressions.triggered.connect(self._copySelectedExpressions)
+        self._edit_expressions.triggered.connect(self._editSelectedExpression)
+        self._delete.triggered.connect(self._deleteSelectedEquations)
+        self._save.triggered.connect(self.model().saveHistory)
+        self._clear.triggered.connect(self._clear)
 
     def _updateContextMenu(self) -> None:
         if not self._context_menu:
