@@ -13,11 +13,13 @@ class HistoryListView(QListView):
         self.customContextMenuRequested.connect(self.showContextMenu)
         self._context_menu = None
 
-    def keyPressEvent(self, event: QKeyEvent) -> None:
-        index = self.currentIndex()
-
-        if event.matches(QKeySequence.Cut):
-            self._cutSelectedEquation(index)
+        self.copy_equations = None
+        self.cut_equations = None
+        self.copy_expressions = None
+        self.edit_expressions = None
+        self.delete = None
+        self.clear = None
+        self.save = None
 
     def _deleteSelectedEquations(self) -> None:
         for index in reversed(sorted(self.selectedIndexes(), key=QModelIndex.row)):
@@ -54,33 +56,24 @@ class HistoryListView(QListView):
     def _createContextMenu(self) -> None:
         self._context_menu = QMenu()
 
-        self._context_menu.addAction('Copy equations')
-        self._context_menu.addAction('Cut equations')
-        self._context_menu.addAction('Copy expressions')
-        self._context_menu.addAction('Edit expressions')
-        self._context_menu.addAction('Delete')
+        self.copy_equations = self._context_menu.addAction('Copy equations')
+        self.cut_equations = self._context_menu.addAction('Cut equations')
+        self.copy_expressions = self._context_menu.addAction('Copy expressions')
+        self.edit_expressions = self._context_menu.addAction('Edit expressions')
+        self.delete = self._context_menu.addAction('Delete')
 
         self._context_menu.addSeparator()
 
-        self._context_menu.addAction('Clear')
-        self._context_menu.addAction('Save')
+        self.clear = self._context_menu.addAction('Clear')
+        self.save = self._context_menu.addAction('Save')
 
-    def _handleContextAction(self, action: QAction) -> None:
-        action_text = action.text()
-        if action_text == 'Delete':
-            self._deleteSelectedEquations()
-        elif action_text == 'Copy equations':
-            self._copySelectedEquations()
-        elif action_text == 'Copy expressions':
-            self._copySelectedExpressions()
-        elif action_text == 'Cut equations':
-            self._cutSelectedEquations()
-        elif action_text == 'Edit expressions':
-            self._editSelectedExpression()
-        elif action_text == 'Save history':
-            self.model().saveHustory()
-        elif action_text == 'Clear history':
-            self._clear()
+        self.copy_equations.triggered.connect(self._copySelectedEquations)
+        self.cut_equations.triggered.connect(self._cutSelectedEquations)
+        self.copy_expressions.triggered.connect(self._copySelectedExpressions)
+        self.edit_expressions.triggered.connect(self._editSelectedExpression)
+        self.delete.triggered.connect(self._deleteSelectedEquations)
+        self.save.triggered.connect(self.model().saveHistory)
+        self.clear.triggered.connect(self._clear)
 
     def _updateContextMenu(self) -> None:
         if not self._context_menu:
@@ -101,6 +94,4 @@ class HistoryListView(QListView):
 
         self._updateContextMenu()
 
-        action = self._context_menu.exec_(self.mapToGlobal(pos))
-        if action is not None:
-            self._handleContextAction(action)
+        self._context_menu.exec_(self.mapToGlobal(pos))
