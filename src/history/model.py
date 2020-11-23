@@ -1,12 +1,10 @@
 import typing
 
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData, QPoint
-from PyQt5.QtGui import QKeyEvent, QKeySequence
-from PyQt5.QtWidgets import QApplication, QListView, QMenu, QFileDialog, QAbstractItemView
+from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData
+from PyQt5.QtWidgets import QFileDialog
 
 from src.core.core import saveHistoryToFile
 from src.expression.expressions import calculate
-from src.expression.is_valid_expression import isValidExpression
 
 
 class HistoryListModel(QAbstractListModel):
@@ -28,12 +26,12 @@ class HistoryListModel(QAbstractListModel):
             return None
 
         expression = self._expressions[index.row()]
-        equation = f'{expression} = {calculate(expression)}'
 
         if role == Qt.DisplayRole:
-            return equation
-
-        if role == Qt.UserRole:
+            return f'{expression} = {calculate(expression)}'
+        elif role == Qt.UserRole:
+            return expression
+        elif role == Qt.EditRole:
             return expression
 
     def clear(self) -> None:
@@ -76,16 +74,16 @@ class HistoryListModel(QAbstractListModel):
         if not index.isValid():
             return False
 
-        if role != Qt.DisplayRole:
-            return False
+        if role == Qt.EditRole:
+            self._expressions[index.row()] = value
+            self.dataChanged.emit(index, index)
+            return True
 
-        self._expressions[index.row()] = value
-        self.dataChanged.emit(index, index)
-        return True
+        return False
 
     def flags(self, index: QModelIndex) -> int:
         if index.isValid():
-            return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled
+            return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEditable
         else:
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDropEnabled
 
@@ -115,6 +113,6 @@ class HistoryListModel(QAbstractListModel):
 
         index = self.index(row, 0, QModelIndex())
         text = data.text().replace('V', '√')
-        self.setData(index, text, Qt.DisplayRole)
+        self.setData(index, text, Qt.EditRole)
 
         return True
