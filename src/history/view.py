@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, QModelIndex, QPoint
-from PyQt5.QtGui import QKeyEvent, QKeySequence
-from PyQt5.QtWidgets import QListView, QAbstractItemView, QApplication, QMenu, QAction
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QListView, QAbstractItemView, QApplication, QMenu, QToolBar
 
 
 class HistoryListView(QListView):
@@ -13,20 +13,18 @@ class HistoryListView(QListView):
         self.customContextMenuRequested.connect(self.showContextMenu)
         self._context_menu = None
 
-        self._copy_equations = None
-        self._cut_equations = None
-        self._copy_expressions = None
-        self._edit_expressions = None
-        self._delete = None
-        self._clear = None
-        self._save = None
+        # Actions
+        self._copy_equations_action = None
+        self._cut_equations_action = None
+        self._copy_expressions_action = None
+        self._edit_expression_action = None
+        self._delete_action = None
+        self._clear_action = None
+        self._save_action = None
 
     def _deleteSelectedEquations(self) -> None:
         for index in reversed(sorted(self.selectedIndexes(), key=QModelIndex.row)):
             self.model().removeRow(index.row(), QModelIndex())
-
-    def _clear(self) -> None:
-        self.model().clear()
 
     def _copySelectedEquations(self) -> None:
         text_to_copy = ''
@@ -56,37 +54,58 @@ class HistoryListView(QListView):
     def _createContextMenu(self) -> None:
         self._context_menu = QMenu()
 
-        self._copy_equations = self._context_menu.addAction('Copy equations')
-        self._cut_equations = self._context_menu.addAction('Cut equations')
-        self._copy_expressions = self._context_menu.addAction('Copy expressions')
-        self._edit_expressions = self._context_menu.addAction('Edit expressions')
-        self._delete = self._context_menu.addAction('Delete')
+        self._copy_equations_action = self._context_menu.addAction('Copy equations')
+        self._copy_equations_action.triggered.connect(self._copySelectedEquations)
+
+        self._cut_equations_action = self._context_menu.addAction('Cut equations')
+        self._cut_equations_action.triggered.connect(self._cutSelectedEquations)
+
+        self._copy_expressions_action = self._context_menu.addAction('Copy expressions')
+        self._copy_expressions_action.triggered.connect(self._copySelectedExpressions)
+
+        self._edit_expression_action = self._context_menu.addAction('Edit expression')
+        self._edit_expression_action.triggered.connect(self._editSelectedExpression)
+
+        self._delete_action = self._context_menu.addAction('Delete')
+        self._delete_action.setShortcut(QKeySequence.Delete)
+        self._delete_action.triggered.connect(self._deleteSelectedEquations)
+        self.addAction(self._delete_action)
 
         self._context_menu.addSeparator()
 
-        self._clear = self._context_menu.addAction('Clear')
-        self._save = self._context_menu.addAction('Save')
+        self._clear_action = self._context_menu.addAction('Clear')
+        self._clear_action.triggered.connect(self.model().clear)
 
-        self._copy_equations.triggered.connect(self._copySelectedEquations)
-        self._cut_equations.triggered.connect(self._cutSelectedEquations)
-        self._copy_expressions.triggered.connect(self._copySelectedExpressions)
-        self._edit_expressions.triggered.connect(self._editSelectedExpression)
-        self._delete.triggered.connect(self._deleteSelectedEquations)
-        self._save.triggered.connect(self.model().saveHistory)
-        self._clear.triggered.connect(self._clear)
+        self._save_action = self._context_menu.addAction('Save')
+        self._save_action.triggered.connect(self.model().saveHistory)
+
+    def _setActionsEnabled(self, enable: bool = True) -> None:
+        self._copy_equations_action.setEnabled(enable)
+        self._cut_equations_action.setEnabled(enable)
+        self._copy_expressions_action.setEnabled(enable)
+        self._edit_expression_action.setEnabled(enable)
+        self._delete_action.setEnabled(enable)
+        self._clear_action.setEnabled(enable)
+        self._save_action.setEnabled(enable)
 
     def _updateContextMenu(self) -> None:
         if not self._context_menu:
             self._createContextMenu()
 
-        indexes = self.selectedIndexes()
-        if not indexes:
-            self._context_menu.setDisabled(True)
-        elif len(indexes) == 1:
-            self._context_menu.setDisabled(False)
-            self._context_menu.actions()[3].setDisabled(True)
+        if self.model().rowCount(QModelIndex()) <= 0:
+            self._setActionsEnabled(False)
         else:
-            self._context_menu.setDisabled(False)
+            indexes = self.selectedIndexes()
+            if not indexes:
+                self._setActionsEnabled(False)
+            elif len(indexes) == 1:
+                self._setActionsEnabled(True)
+            else:
+                self._setActionsEnabled(True)
+                self._edit_expression_action.setDisabled(True)
+
+            self._clear_action.setEnabled(True)
+            self._save_action.setEnabled(True)
 
     def showContextMenu(self, pos: QPoint) -> None:
         if not self._context_menu:
