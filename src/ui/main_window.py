@@ -1,14 +1,12 @@
 from PyQt5 import QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QListView, qApp, QSizePolicy, \
-    QFileDialog, QGridLayout, QApplication, QMenu
-from PyQt5.uic.properties import QtCore
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, qApp, QSizePolicy, \
+    QGridLayout, QApplication
 
-from src.core.core import saveHistoryToFile
 from src.expression.expressions import calculate
 from src.expression.is_valid_expression import isValidExpression, VALID_CHARS
-from src.history.history_list import HistoryListModel, HistoryListView
+from src.history import HistoryListModel, HistoryListView
 
 
 class ExpressionField(QLineEdit):
@@ -287,8 +285,7 @@ class MainWindow(QWidget):
         self.history_list_view.setModel(self.history_list_model)
 
         history_layout.addWidget(self.history_list_view)
-        self.history_list_view.doubleClicked.connect(self._setExpressionFromHistory)
-        self.history_list_view.customContextMenuRequested.connect(self.history_list_view.contextMenu)
+        # self.history_list_view.doubleClicked.connect(self._setExpressionFromHistory)
 
         history_buttons_layout = QHBoxLayout()
         history_buttons_layout.setContentsMargins(0, 0, 0, 0)
@@ -307,7 +304,20 @@ class MainWindow(QWidget):
         self.save_history_button.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
         self.save_history_button.clicked.connect(self.history_list_model.saveHistory)
 
+        self._updateHistoryButtons()
+        self.history_list_model.modelReset.connect(self._updateHistoryButtons)
+        self.history_list_model.rowsRemoved.connect(self._updateHistoryButtons)
+        self.history_list_model.rowsInserted.connect(self._updateHistoryButtons)
+
         self.show()
+
+    def _updateHistoryButtons(self) -> None:
+        if self.history_list_model.rowCount(QModelIndex()) > 0:
+            self.clear_history_button.setEnabled(True)
+            self.save_history_button.setEnabled(True)
+        else:
+            self.clear_history_button.setDisabled(True)
+            self.save_history_button.setDisabled(True)
 
     def _onButtonClick(self) -> None:
         char_to_add = qApp.sender().text()
@@ -343,5 +353,3 @@ class MainWindow(QWidget):
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         pass
-
-
