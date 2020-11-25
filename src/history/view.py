@@ -71,32 +71,46 @@ class HistoryListView(QListView):
         self._context_menu.addAction('Copy...').setMenu(self._copy_submenu)
 
         self._copy_equations_action = self._copy_submenu.addAction('Equations')
+        self._copy_equations_action.setShortcut(QKeySequence.Copy)
         self._copy_equations_action.triggered.connect(self._copySelectedEquations)
+        self.addAction(self._copy_equations_action)
 
         self._copy_expressions_action = self._copy_submenu.addAction('Expressions')
+        self._copy_expressions_action.setShortcut(Qt.ALT + Qt.CTRL + Qt.Key_C)
         self._copy_expressions_action.triggered.connect(self._copySelectedExpressions)
+        self.addAction(self._copy_expressions_action)
 
         self._copy_results_action = self._copy_submenu.addAction('Results')
+        self._copy_results_action.setShortcut(Qt.SHIFT + Qt.CTRL + Qt.Key_C)
         self._copy_results_action.triggered.connect(self._copySelectedResults)
+        self.addAction(self._copy_results_action)
 
         self._cut_equations_action = self._context_menu.addAction('Cut equations')
+        self._cut_equations_action.setShortcut(QKeySequence.Cut)
         self._cut_equations_action.triggered.connect(self._cutSelectedEquations)
+        self.addAction(self._cut_equations_action)
 
         self._edit_expression_action = self._context_menu.addAction('Edit expression')
+        self._edit_expression_action.setShortcut(Qt.CTRL + Qt.Key_E)
         self._edit_expression_action.triggered.connect(self._editSelectedExpression)
+        self.addAction(self._edit_expression_action)
 
         self._delete_action = self._context_menu.addAction('Delete')
-        # self._delete_action.setShortcut(QKeySequence.Delete)
+        self._delete_action.setShortcut(QKeySequence.Delete)
         self._delete_action.triggered.connect(self._deleteSelectedEquations)
-        # self.addAction(self._delete_action)
+        self.addAction(self._delete_action)
 
         self._context_menu.addSeparator()
 
         self._clear_action = self._context_menu.addAction('Clear')
+        self._clear_action.setShortcut(QKeySequence.DeleteEndOfWord)
         self._clear_action.triggered.connect(self.model().clear)
+        self.addAction(self._clear_action)
 
         self._save_action = self._context_menu.addAction('Save')
+        self._save_action.setShortcut(QKeySequence.Save)
         self._save_action.triggered.connect(self.model().saveHistory)
+        self.addAction(self._save_action)
 
     def _setActionsEnabled(self, enable: bool = True) -> None:
         self._copy_equations_action.setEnabled(enable)
