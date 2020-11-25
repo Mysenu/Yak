@@ -15,8 +15,9 @@ class HistoryListView(QListView):
 
         # Actions
         self._copy_equations_action = None
-        self._cut_equations_action = None
         self._copy_expressions_action = None
+        self._copy_results_action = None
+        self._cut_equations_action = None
         self._edit_expression_action = None
         self._delete_action = None
         self._clear_action = None
@@ -46,6 +47,15 @@ class HistoryListView(QListView):
         clipboard = QApplication.clipboard()
         clipboard.setText(text_to_copy)
 
+    def _copySelectedResults(self) -> None:
+        results = []
+        for index in self.selectedIndexes():
+            results.append(str(self.model().data(index, Qt.WhatsThisRole)))
+        text_to_copy = '\n'.join(results)
+
+        clipboard = QApplication.clipboard()
+        clipboard.setText(text_to_copy)
+
     def _cutSelectedEquations(self) -> None:
         self._copySelectedEquations()
         self._deleteSelectedEquations()
@@ -55,15 +65,21 @@ class HistoryListView(QListView):
 
     def _createContextMenu(self) -> None:
         self._context_menu = QMenu()
+        copy = QMenu()
 
-        self._copy_equations_action = self._context_menu.addAction('Copy equations')
+        self._context_menu.addAction('Copy...').setMenu(copy)
+
+        self._copy_equations_action = copy.addAction('Equations')
         self._copy_equations_action.triggered.connect(self._copySelectedEquations)
+
+        self._copy_expressions_action = copy.addAction('Expressions')
+        self._copy_expressions_action.triggered.connect(self._copySelectedExpressions)
+
+        self._copy_results_action = copy.addAction('Results')
+        self._copy_results_action.triggered.connect(self._copySelectedResults)
 
         self._cut_equations_action = self._context_menu.addAction('Cut equations')
         self._cut_equations_action.triggered.connect(self._cutSelectedEquations)
-
-        self._copy_expressions_action = self._context_menu.addAction('Copy expressions')
-        self._copy_expressions_action.triggered.connect(self._copySelectedExpressions)
 
         self._edit_expression_action = self._context_menu.addAction('Edit expression')
         self._edit_expression_action.triggered.connect(self._editSelectedExpression)

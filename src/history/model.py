@@ -26,13 +26,16 @@ class HistoryListModel(QAbstractListModel):
             return None
 
         expression = self._expressions[index.row()]
+        result = calculate(expression)
 
         if role == Qt.DisplayRole:
-            return f'{expression} = {calculate(expression)}'
+            return f'{expression} = {result}'
         elif role == Qt.UserRole:
             return expression
         elif role == Qt.EditRole:
             return expression
+        elif role == Qt.WhatsThisRole:
+            return result
 
     def clear(self) -> None:
         self.beginResetModel()
