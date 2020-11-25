@@ -27,18 +27,20 @@ class HistoryListView(QListView):
             self.model().removeRow(index.row(), QModelIndex())
 
     def _copySelectedEquations(self) -> None:
-        text_to_copy = ''
+        equations = []
         for index in self.selectedIndexes():
-            text_to_copy += f'{self.model().data(index, Qt.DisplayRole)}\n'
+            equations.append(self.model().data(index, Qt.DisplayRole))
+        text_to_copy = '\n'.join(equations)
         text_to_copy = text_to_copy.replace('√', 'V')
 
         clipboard = QApplication.clipboard()
         clipboard.setText(text_to_copy)
 
     def _copySelectedExpressions(self) -> None:
-        text_to_copy = ''
+        expressions = []
         for index in self.selectedIndexes():
-            text_to_copy += f'{self.model().data(index, Qt.UserRole)}\n'
+            expressions.append(self.model().data(index, Qt.UserRole))
+        text_to_copy = '\n'.join(expressions)
         text_to_copy = text_to_copy.replace('√', 'V')
 
         clipboard = QApplication.clipboard()
