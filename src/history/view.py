@@ -66,9 +66,9 @@ class HistoryListView(QListView):
 
     def _createContextMenu(self) -> None:
         self._context_menu = QMenu()
-        self._copy_submenu = QMenu()
 
-        self._context_menu.addAction('Copy...').setMenu(self._copy_submenu)
+        self._copy_submenu = QMenu('Copy')
+        self._context_menu.addMenu(self._copy_submenu)
 
         self._copy_equations_action = self._copy_submenu.addAction('Equations')
         self._copy_equations_action.setShortcut(QKeySequence.Copy)
@@ -76,12 +76,12 @@ class HistoryListView(QListView):
         self.addAction(self._copy_equations_action)
 
         self._copy_expressions_action = self._copy_submenu.addAction('Expressions')
-        self._copy_expressions_action.setShortcut(Qt.ALT + Qt.CTRL + Qt.Key_C)
+        self._copy_expressions_action.setShortcut(Qt.CTRL + Qt.ALT + Qt.Key_C)
         self._copy_expressions_action.triggered.connect(self._copySelectedExpressions)
         self.addAction(self._copy_expressions_action)
 
         self._copy_results_action = self._copy_submenu.addAction('Results')
-        self._copy_results_action.setShortcut(Qt.SHIFT + Qt.CTRL + Qt.Key_C)
+        self._copy_results_action.setShortcut(Qt.CTRL + Qt.SHIFT + Qt.Key_C)
         self._copy_results_action.triggered.connect(self._copySelectedResults)
         self.addAction(self._copy_results_action)
 
@@ -103,7 +103,6 @@ class HistoryListView(QListView):
         self._context_menu.addSeparator()
 
         self._clear_action = self._context_menu.addAction('Clear')
-        self._clear_action.setShortcut(QKeySequence.DeleteEndOfWord)
         self._clear_action.triggered.connect(self.model().clear)
         self.addAction(self._clear_action)
 
@@ -113,13 +112,15 @@ class HistoryListView(QListView):
         self.addAction(self._save_action)
 
     def _setActionsEnabled(self, enable: bool = True) -> None:
-        self._copy_equations_action.setEnabled(enable)
-        self._cut_equations_action.setEnabled(enable)
-        self._copy_expressions_action.setEnabled(enable)
         self._copy_submenu.setEnabled(enable)
+        self._copy_equations_action.setEnabled(enable)
+        self._copy_expressions_action.setEnabled(enable)
         self._copy_results_action.setEnabled(enable)
+
+        self._cut_equations_action.setEnabled(enable)
         self._edit_expression_action.setEnabled(enable)
         self._delete_action.setEnabled(enable)
+
         self._clear_action.setEnabled(enable)
         self._save_action.setEnabled(enable)
 
