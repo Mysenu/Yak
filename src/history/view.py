@@ -62,7 +62,9 @@ class HistoryListView(QListView):
         self._deleteSelectedEquations()
 
     def _editSelectedExpression(self) -> None:
-        pass
+        indexes = self.selectedIndexes()
+        for index in indexes:
+            self.edit(index)
 
     def _createContextMenu(self) -> None:
         self._context_menu = QMenu()
