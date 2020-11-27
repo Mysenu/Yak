@@ -1,6 +1,6 @@
 import typing
 
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData
+from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData, QByteArray
 from PyQt5.QtWidgets import QFileDialog
 
 from src.core.core import saveHistoryToFile
@@ -98,10 +98,12 @@ class HistoryListModel(QAbstractListModel):
 
     def mimeData(self, indexes: typing.List[QModelIndex]) -> QMimeData:
         mime_data = QMimeData()
+        expressions = []
         for index in indexes:
             if index.isValid():
                 text = self.data(index, Qt.UserRole).replace('√', 'V')
-                mime_data.setText(text)
+                expressions.append(text)
+        mime_data.setText('\n'.join(expressions))
         return mime_data
 
     def dropMimeData(self, data: QMimeData, action: int, row: int, column: int, parent: QModelIndex) -> bool:
