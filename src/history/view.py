@@ -68,8 +68,16 @@ class HistoryListView(QListView):
 
     def _editSelectedExpression(self) -> None:
         indexes = self.selectedIndexes()
-        for index in indexes:
-            self.edit(index)
+        if len(indexes) == 1:
+            self.edit(indexes[0])
+
+    def _askUserToClear(self) -> bool:
+        button = QMessageBox.question(self, 'Clear', 'Clear all history?')
+        return button == QMessageBox.Yes
+
+    def clear(self) -> None:
+        if self._askUserToClear():
+            self.model().clear()
 
     def _createContextMenu(self) -> None:
         self._context_menu = QMenu()
@@ -110,7 +118,7 @@ class HistoryListView(QListView):
         self._context_menu.addSeparator()
 
         self._clear_action = self._context_menu.addAction('Clear')
-        self._clear_action.triggered.connect(self.model().clear)
+        self._clear_action.triggered.connect(self.clear)
         self.addAction(self._clear_action)
 
         self._save_action = self._context_menu.addAction('Save')

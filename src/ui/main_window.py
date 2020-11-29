@@ -297,7 +297,7 @@ class MainWindow(QWidget):
         history_buttons_layout.addWidget(self.clear_history_button)
         self.clear_history_button.setMinimumSize(30, 25)
         self.clear_history_button.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
-        self.clear_history_button.clicked.connect(self.history_list_model.clear)
+        self.clear_history_button.clicked.connect(self.history_list_view.clear)
 
         self.save_history_button = QPushButton('Save')
         history_buttons_layout.addWidget(self.save_history_button)
