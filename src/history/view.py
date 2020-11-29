@@ -147,10 +147,10 @@ class HistoryListView(QListView):
             self._clear_action.setEnabled(True)
             self._save_action.setEnabled(True)
 
-    def showContextMenu(self, pos: QPoint) -> None:
+    def showContextMenu(self, local_pos: QPoint) -> None:
         if not self._context_menu:
             self._createContextMenu()
 
         self._updateContextMenu()
 
-        self._context_menu.exec_(self.mapToGlobal(pos))
+        self._context_menu.exec_(self.mapToGlobal(local_pos))
