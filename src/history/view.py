@@ -11,8 +11,11 @@ class HistoryListView(QListView):
 
         self.setMovement(QListView.Snap)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
+
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showContextMenu)
+
+        # Menus
         self._context_menu = None
         self._copy_submenu = None
 
