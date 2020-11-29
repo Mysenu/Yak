@@ -1,10 +1,13 @@
 import typing
 
 from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData, QByteArray
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from src.core.core import saveHistoryToFile
 from src.expression.expressions import calculate
+
+ExpressionRole = Qt.UserRole
+ResultRole = Qt.UserRole + 1
 
 
 class HistoryListModel(QAbstractListModel):
@@ -26,16 +29,15 @@ class HistoryListModel(QAbstractListModel):
             return None
 
         expression = self._expressions[index.row()]
-        result = calculate(expression)
 
         if role == Qt.DisplayRole:
-            return f'{expression} = {result}'
-        elif role == Qt.UserRole:
-            return expression
+            return f'{expression} = {calculate(expression)}'
         elif role == Qt.EditRole:
             return expression
-        elif role == Qt.WhatsThisRole:
-            return result
+        elif role == ExpressionRole:
+            return expression
+        elif role == ResultRole:
+            return calculate(expression)
 
     def clear(self) -> None:
         self.beginResetModel()
@@ -101,7 +103,7 @@ class HistoryListModel(QAbstractListModel):
         expressions = []
         for index in indexes:
             if index.isValid():
-                text = self.data(index, Qt.UserRole).replace('√', 'V')
+                text = self.data(index, ExpressionRole).replace('√', 'V')
                 expressions.append(text)
         mime_data.setText('\n'.join(expressions))
         return mime_data

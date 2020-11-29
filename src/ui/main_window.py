@@ -4,6 +4,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, qApp, QSizePolicy, \
     QGridLayout, QApplication
 
+from model import ExpressionRole
 from src.expression.expressions import calculate
 from src.expression.is_valid_expression import isValidExpression, VALID_CHARS
 from src.history import HistoryListModel, HistoryListView
@@ -337,7 +338,7 @@ class MainWindow(QWidget):
         history_length = self.history_list_model.rowCount(QModelIndex())
         if history_length:
             latest_expr_index = self.history_list_model.index(0, 0)
-            latest_expr = self.history_list_model.data(latest_expr_index, Qt.UserRole)
+            latest_expr = self.history_list_model.data(latest_expr_index, ExpressionRole)
             if latest_expr == expr:
                 return
 
@@ -348,7 +349,7 @@ class MainWindow(QWidget):
         self._calculateCurrentExpression()
 
     def _setExpressionFromHistory(self) -> None:
-        expr = self.history_list_view.currentIndex().data(Qt.UserRole)
+        expr = self.history_list_view.currentIndex().data(ExpressionRole)
         self.entry_field.setText(expr)
 
     def resizeEvent(self, event: QResizeEvent) -> None:

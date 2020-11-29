@@ -1,11 +1,13 @@
 from PyQt5.QtCore import Qt, QModelIndex, QPoint
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QListView, QAbstractItemView, QApplication, QMenu, QToolBar
+from PyQt5.QtWidgets import QListView, QAbstractItemView, QApplication, QMenu, QMessageBox
+
+from model import ResultRole, ExpressionRole
 
 
 class HistoryListView(QListView):
     def __init__(self, parent=None) -> None:
-        super(HistoryListView, self).__init__(parent)
+        super().__init__(parent)
 
         self.setMovement(QListView.Snap)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
@@ -41,7 +43,7 @@ class HistoryListView(QListView):
     def _copySelectedExpressions(self) -> None:
         expressions = []
         for index in self.selectedIndexes():
-            expressions.append(self.model().data(index, Qt.UserRole))
+            expressions.append(self.model().data(index, ExpressionRole))
         text_to_copy = '\n'.join(expressions)
         text_to_copy = text_to_copy.replace('√', 'V')
 
@@ -51,7 +53,7 @@ class HistoryListView(QListView):
     def _copySelectedResults(self) -> None:
         results = []
         for index in self.selectedIndexes():
-            results.append(str(self.model().data(index, Qt.WhatsThisRole)))
+            results.append(str(self.model().data(index, ResultRole)))
         text_to_copy = '\n'.join(results)
 
         clipboard = QApplication.clipboard()
