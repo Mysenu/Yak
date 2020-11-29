@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from src.core.core import saveHistoryToFile
 from src.expression.expressions import calculate
+from src.expression.prepare import toEditableExpr, fromEditableExpr
 
 ExpressionRole = Qt.UserRole
 ResultRole = Qt.UserRole + 1
@@ -103,7 +104,7 @@ class HistoryListModel(QAbstractListModel):
         expressions = []
         for index in indexes:
             if index.isValid():
-                text = self.data(index, ExpressionRole).replace('√', 'V')
+                text = toEditableExpr(self.data(index, ExpressionRole))
                 expressions.append(text)
         mime_data.setText('\n'.join(expressions))
         return mime_data
@@ -119,7 +120,7 @@ class HistoryListModel(QAbstractListModel):
             self.insertRow(row, QModelIndex())
 
         index = self.index(row, 0, QModelIndex())
-        text = data.text().replace('V', '√')
+        text = fromEditableExpr(data.text().lower())
         self.setData(index, text, Qt.EditRole)
 
         return True

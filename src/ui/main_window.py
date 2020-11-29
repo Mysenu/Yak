@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLin
 from model import ExpressionRole
 from src.expression.expressions import calculate
 from src.expression.is_valid_expression import isValidExpression, VALID_CHARS
+from src.expression.prepare import fromEditableExpr, toEditableExpr
 from src.history import HistoryListModel, HistoryListView
 
 
@@ -39,7 +40,7 @@ class ExpressionField(QLineEdit):
         return not (set(text) - VALID_CHARS)
 
     def insert(self, text: str) -> None:
-        text = text.lower().replace('v', '√')
+        text = fromEditableExpr(text.lower())
 
         if self.canBeAdded(text):
             super().insert(text)
@@ -60,7 +61,7 @@ class ExpressionField(QLineEdit):
                 else:
                     text_to_copy = self.text()
 
-                text_to_copy = text_to_copy.replace('√', 'v')
+                text_to_copy = toEditableExpr(text_to_copy)
 
                 clipboard = QApplication.clipboard()
                 clipboard.setText(text_to_copy)
@@ -82,7 +83,7 @@ class ExpressionField(QLineEdit):
                 else:
                     text_to_copy = self.text()
                     self.clear()
-                text_to_copy = text_to_copy.replace('√', 'V')
+                text_to_copy = toEditableExpr(text_to_copy)
 
                 clipboard = QApplication.clipboard()
                 clipboard.setText(text_to_copy)

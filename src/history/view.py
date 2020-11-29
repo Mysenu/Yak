@@ -3,6 +3,7 @@ from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QListView, QAbstractItemView, QApplication, QMenu, QMessageBox
 
 from model import ResultRole, ExpressionRole
+from src.expression.prepare import toEditableExpr
 
 
 class HistoryListView(QListView):
@@ -38,7 +39,7 @@ class HistoryListView(QListView):
         for index in self.selectedIndexes():
             equations.append(self.model().data(index, Qt.DisplayRole))
         text_to_copy = '\n'.join(equations)
-        text_to_copy = text_to_copy.replace('√', 'V')
+        text_to_copy = toEditableExpr(text_to_copy)
 
         clipboard = QApplication.clipboard()
         clipboard.setText(text_to_copy)
@@ -48,7 +49,7 @@ class HistoryListView(QListView):
         for index in self.selectedIndexes():
             expressions.append(self.model().data(index, ExpressionRole))
         text_to_copy = '\n'.join(expressions)
-        text_to_copy = text_to_copy.replace('√', 'V')
+        text_to_copy = toEditableExpr(text_to_copy)
 
         clipboard = QApplication.clipboard()
         clipboard.setText(text_to_copy)

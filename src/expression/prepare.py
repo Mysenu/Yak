@@ -61,4 +61,13 @@ def convertToPyExpr_2(expr: str) -> str:
 
         if sub_exp:
             expr = f'{expr[:start]}{operators[operator]}({sub_exp}){expr[end:]}'
-            print(expr)
+
+            
+def toEditableExpr(expression: str) -> str:
+    expression = expression.replace('√', 'V')
+    return expression
+
+
+def fromEditableExpr(expression: str) -> str:
+    expression = expression.replace('v', '√')
+    return expression
