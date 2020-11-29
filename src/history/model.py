@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from src.core.core import saveHistoryToFile
 from src.expression.expressions import calculate
+from src.expression.is_valid_expression import isValidExpression
 from src.expression.prepare import toEditableExpr, fromEditableExpr
 
 ExpressionRole = Qt.UserRole
@@ -78,6 +79,11 @@ class HistoryListModel(QAbstractListModel):
 
     def setData(self, index: QModelIndex, value: typing.Any, role: int = ...) -> bool:
         if not index.isValid():
+            return False
+
+        value = fromEditableExpr(value.lower())
+
+        if not isValidExpression(value):
             return False
 
         if role == Qt.EditRole:
