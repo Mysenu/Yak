@@ -8,7 +8,7 @@ def toPercent(value: Union[int, float]) -> float:
     return value * 0.01
 
 
-def calculate(expression: str) -> Optional[Union[int, float]]:
+def calculate_expr(expression: str) -> Optional[Union[int, float]]:
     if not isValidExpression(expression):
         return None
 
