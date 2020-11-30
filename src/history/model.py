@@ -4,8 +4,8 @@ from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData, QByteAr
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from src.core.core import saveHistoryToFile
-from src.expression.expressions import calculate
-from src.expression.is_valid_expression import isValidExpression
+from src.expression.calculate import calculate
+from src.expression.check import isValidExpression
 from src.expression.prepare import toEditableExpr, fromEditableExpr
 
 ExpressionRole = Qt.UserRole

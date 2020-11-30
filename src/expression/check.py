@@ -340,7 +340,10 @@ def isValidExpression(expr: str) -> bool:
     index = 0
     while index < len(expr):
         char = expr[index]
-
+        # print(f'Char: {char} ; index: {index}')
+        # print(f'In operand: {in_operand}')
+        # print(f'Operand part: {operand_part.name}')
+        # print(f'Operand counter: {operand_counter}')
         if char in BRACKETS:
             if char == '(':
                 bracket_counter += 1
@@ -482,6 +485,13 @@ def isValidExpression(expr: str) -> bool:
             return False
 
         index += 1
+    #
+    # print()
+    # print(f'Last In operand: {in_operand}')
+    # print(f'Last Operand part: {operand_part.name}')
+    # print(f'Last Bracket count: {bracket_counter}')
+    # print(f'Last Operand count: {operand_counter}')
+    # print()
 
     if bracket_counter > 0:
         return False
