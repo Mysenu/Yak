@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, qApp
     QGridLayout
 
 from model import ExpressionRole
-from src.expression.calculate import calculate
+from src.expression.calculate import calculate_expr
 from src.expression.check import isValidExpression
 from src.history import HistoryListModel, HistoryListView
 from src.ui.expression_field import ExpressionField
@@ -235,7 +235,7 @@ class MainWindow(QWidget):
         self.entry_field.insert(char_to_add)
 
     def _calculateCurrentExpression(self) -> None:
-        result = calculate(self.entry_field.text())
+        result = calculate_expr(self.entry_field.text())
         if result is not None:
             self.entry_field.setText(str(result))
 
