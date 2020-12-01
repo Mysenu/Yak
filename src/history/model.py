@@ -3,8 +3,8 @@ import typing
 from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData, QByteArray
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
-from src.core.core import saveHistoryToFile
-from src.expression.calculate import calculate_expr
+from utils import saveHistoryToFile
+from src.expression.calculate import calculateExpr
 from src.expression.check import isValidExpression
 from src.expression.prepare import toEditableExpr, fromEditableExpr
 
@@ -33,13 +33,13 @@ class HistoryListModel(QAbstractListModel):
         expression = self._expressions[index.row()]
 
         if role == Qt.DisplayRole:
-            return f'{expression} = {calculate_expr(expression)}'
+            return f'{expression} = {calculateExpr(expression)}'
         elif role == Qt.EditRole:
             return expression
         elif role == ExpressionRole:
             return expression
         elif role == ResultRole:
-            return calculate_expr(expression)
+            return calculateExpr(expression)
 
     def clear(self) -> None:
         self.beginResetModel()
@@ -61,7 +61,7 @@ class HistoryListModel(QAbstractListModel):
     def equations(self) -> typing.List[str]:
         equations_list = []
         for expression in self._expressions:
-            equations_list.append(f'{expression} = {calculate_expr(expression)}')
+            equations_list.append(f'{expression} = {calculateExpr(expression)}')
         return equations_list
 
     def insertRows(self, row: int, count: int, parent: QModelIndex = ...) -> bool:

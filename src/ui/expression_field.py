@@ -1,6 +1,6 @@
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import Qt, QKeyEvent, QKeySequence
+from PyQt5.QtGui import QKeyEvent, QKeySequence
 from PyQt5.QtWidgets import QLineEdit, QApplication
 
 from src.expression.check import VALID_CHARS
@@ -8,8 +8,8 @@ from src.expression.prepare import fromEditableExpr, toEditableExpr
 
 
 class ExpressionField(QLineEdit):
-    _valid_keys = {Qt.Key_Backspace, Qt.Key_Enter, Qt.Key_Return, Qt.Key_C, Qt.Key_V, Qt.Key_X,
-                   Qt.Key_Right, Qt.Key_Left, Qt.Key_Delete, Qt.Key_Home, Qt.Key_End}
+    valid_keys = {Qt.Key_Backspace, Qt.Key_Enter, Qt.Key_Return, Qt.Key_C, Qt.Key_V, Qt.Key_X,
+                  Qt.Key_Right, Qt.Key_Left, Qt.Key_Delete, Qt.Key_Home, Qt.Key_End}
 
     def __init__(self):
         super(ExpressionField, self).__init__()
@@ -45,7 +45,7 @@ class ExpressionField(QLineEdit):
         text = event.text()
         if not (set(text) - (VALID_CHARS | set('vV'))) and event.modifiers() in (Qt.NoModifier, Qt.ShiftModifier):
             self.insert(text)
-        elif event.key() in self._valid_keys:
+        elif event.key() in self.valid_keys:
             if event.matches(QKeySequence.Cancel):
                 self.clear()
             elif event.matches(QKeySequence.Copy):
@@ -91,7 +91,3 @@ class ExpressionField(QLineEdit):
 
     def dropEvent(self, data: QtGui.QDropEvent) -> None:
         self.insert(data.mimeData().text())
-
-    @property
-    def valid_keys(self):
-        return self._valid_keys
