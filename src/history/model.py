@@ -20,6 +20,16 @@ class HistoryListModel(QAbstractListModel):
 
     def addExpression(self, expr: str, index: int = 0) -> None:
         self.beginResetModel()
+
+        if not isValidExpression(expr):
+            return
+
+        if self.rowCount(QModelIndex()):
+            latest_expr_index = self.index(0, 0)
+            latest_expr = self.data(latest_expr_index, ExpressionRole)
+            if latest_expr == expr:
+                return
+
         self._expressions.insert(index, expr)
         self.endResetModel()
 

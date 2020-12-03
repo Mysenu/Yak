@@ -241,17 +241,6 @@ class MainWindow(QWidget):
 
     def _addExpressionToHistory(self) -> None:
         expr = self.entry_field.text()
-
-        if not isValidExpression(expr):
-            return
-
-        history_length = self.history_list_model.rowCount(QModelIndex())
-        if history_length:
-            latest_expr_index = self.history_list_model.index(0, 0)
-            latest_expr = self.history_list_model.data(latest_expr_index, ExpressionRole)
-            if latest_expr == expr:
-                return
-
         self.history_list_model.addExpression(expr)
 
     def _onEvalButtonClick(self) -> None:
