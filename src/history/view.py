@@ -3,7 +3,7 @@ from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QListView, QAbstractItemView, QApplication, QMenu, QMessageBox
 
 from model import ResultRole, ExpressionRole
-from src.expression.prepare import toEditableExpr
+from src.expression.utils import toEditableExpr
 
 
 class HistoryListView(QListView):

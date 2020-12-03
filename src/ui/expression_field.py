@@ -3,8 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent, QKeySequence
 from PyQt5.QtWidgets import QLineEdit, QApplication
 
-from src.expression.check import VALID_CHARS
-from src.expression.prepare import fromEditableExpr, toEditableExpr
+from src.expression.utils import VALID_CHARS, fromEditableExpr, toEditableExpr
 
 
 class ExpressionField(QLineEdit):

@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, qApp
 
 from model import ExpressionRole
 from src.expression.calculate import calculateExpr
-from src.expression.check import isValidExpression
+from src.expression.validation import isValidExpression
 from src.history import HistoryListModel, HistoryListView
 from src.ui.expression_field import ExpressionField
 

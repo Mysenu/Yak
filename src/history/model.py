@@ -1,12 +1,12 @@
 import typing
 
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData, QByteArray
+from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from utils import saveHistoryToFile
 from src.expression.calculate import calculateExpr
-from src.expression.check import isValidExpression
-from src.expression.prepare import toEditableExpr, fromEditableExpr
+from src.expression import isValidExpression, toEditableExpr
+from src.expression.utils import fromEditableExpr
 
 ExpressionRole = Qt.UserRole
 ResultRole = Qt.UserRole + 1

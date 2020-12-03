@@ -1,2 +1,2 @@
-from .expression_field import *
-from .main_window import *
+from .expression_field import ExpressionField
+from .main_window import MainWindow
