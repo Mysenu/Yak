@@ -1,16 +1,19 @@
 import sys
 
-from PyQt5.QtWidgets import QApplication
+from src.core.application import Application
 
 from src.ui.main_window import MainWindow
 
 
-def my_excepthook(type, value, tback):
+def my_excepthook(type, value, tback) -> None:
     sys.__excepthook__(type, value, tback)
 
 
-sys.excepthook = my_excepthook
-app = QApplication(sys.argv)
+def main() -> int:
+    sys.excepthook = my_excepthook
+    app = Application(sys.argv)
+    return app.exec_()
 
-window = MainWindow()
-exit(app.exec_())
+
+if __name__ == '__main__':
+    exit(main())
