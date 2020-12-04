@@ -19,8 +19,6 @@ class HistoryListModel(QAbstractListModel):
         self._expressions = []
 
     def addExpression(self, expr: str, index: int = 0) -> None:
-        self.beginResetModel()
-
         if not isValidExpression(expr):
             return
 
@@ -30,6 +28,7 @@ class HistoryListModel(QAbstractListModel):
             if latest_expr == expr:
                 return
 
+        self.beginResetModel()
         self._expressions.insert(index, expr)
         self.endResetModel()
 
