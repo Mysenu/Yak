@@ -1,8 +1,6 @@
 import sys
 
-from src.core.application import Application
-
-from src.ui.main_window import MainWindow
+from .application import Application
 
 
 def my_excepthook(type, value, tback) -> None:

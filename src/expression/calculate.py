@@ -1,9 +1,9 @@
 from math import sqrt, pow
 from typing import Union, Optional
 
-from src.expression.parser import findOperand, findOperands
-from src.expression.utils import RIGHT_UNARY_OPS, ScanDirection
-from src.expression.validation import isValidExpression
+from .parser import RIGHT_UNARY_OPS
+from .parser import findOperand, findOperands, ScanDirection
+from .validation import isValidExpression
 
 pow = pow
 sqrt = sqrt

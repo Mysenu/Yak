@@ -1,9 +1,9 @@
-from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QKeyEvent, QKeySequence
+from PyQt5.QtGui import QKeyEvent, QKeySequence, QDropEvent
 from PyQt5.QtWidgets import QLineEdit, QApplication
 
-from src.expression.utils import VALID_CHARS, fromEditableExpr, toEditableExpr
+from src.expression import VALID_CHARS
+from src.expression import fromEditableExpr, toEditableExpr
 
 
 class ExpressionField(QLineEdit):
@@ -88,5 +88,5 @@ class ExpressionField(QLineEdit):
 
                 super().keyPressEvent(event)
 
-    def dropEvent(self, data: QtGui.QDropEvent) -> None:
+    def dropEvent(self, data: QDropEvent) -> None:
         self.insert(data.mimeData().text())

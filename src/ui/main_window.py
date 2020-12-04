@@ -1,13 +1,11 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, qApp, QSizePolicy, \
-    QGridLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, qApp, QSizePolicy, QGridLayout
 
-from model import ExpressionRole
-from src.expression.calculate import calculateExpr
-from src.expression.validation import isValidExpression
+from src.expression import calculateExpr
 from src.history import HistoryListModel, HistoryListView
-from src.ui.expression_field import ExpressionField
+from src.history import ExpressionRole
+from .expression_field import ExpressionField
 
 
 class MainWindow(QWidget):

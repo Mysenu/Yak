@@ -2,8 +2,8 @@ from PyQt5.QtCore import Qt, QModelIndex, QPoint
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QListView, QAbstractItemView, QApplication, QMenu, QMessageBox
 
-from model import ResultRole, ExpressionRole
-from src.expression.utils import toEditableExpr
+from .model import ResultRole, ExpressionRole
+from src.expression import toEditableExpr
 
 
 class HistoryListView(QListView):
