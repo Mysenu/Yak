@@ -1,10 +1,13 @@
-from typing import Union, Optional
+from enum import IntEnum
 
-from src.expression.utils import VALID_CHARS, ALL_OPS, OperandPart, BRACKETS, LEFT_UNARY_OPS, \
-    MIDDLE_OPERAND_PART_CHARS, ALWAYS_LEFT_UNARY, BINARY_OPS, RIGHT_UNARY_OPS, OperationType, \
-    ScanDirection
-from src.expression.subexpression import SubExpression
-from src.expression.parser import operationType, findOperand, findOperands
+from .parser import ALWAYS_LEFT_UNARY, LEFT_UNARY_OPS, RIGHT_UNARY_OPS, BINARY_OPS, BRACKETS, ALL_OPS, \
+    MIDDLE_OPERAND_PART_CHARS, VALID_CHARS
+
+
+class OperandPart(IntEnum):
+    Left = 1
+    Middle = 2
+    Right = 3
 
 
 def isValidExpression(expr: str) -> bool:
@@ -200,45 +203,3 @@ def isValidExpression(expr: str) -> bool:
         return False
 
     return True
-
-
-def isValidOperand(operand: Union[str, SubExpression]) -> Optional[bool]:
-    if not operand:
-        return None
-
-    if isinstance(operand, SubExpression):
-        operand = str(operand)
-
-    if set(operand).intersection(ALL_OPS):
-        return isValidExpression(operand)
-    elif operand.startswith('0') and '.' not in operand:
-        return False
-
-    try:
-        float(operand)
-        return True
-    except ValueError:
-        return False
-
-
-def isValidOperation(expr: str, index: int) -> Optional[bool]:
-    operation_type = operationType(expr, index)
-
-    if operation_type == OperationType.Binary:
-        result = findOperands(expr, index)
-    elif operation_type == OperationType.RightUnary:
-        result = findOperand(expr, index, ScanDirection.Left)
-    elif operation_type == OperationType.LeftUnary:
-        result = findOperand(expr, index, ScanDirection.Right)
-    else:
-        return None
-
-    if result is None:
-        return None
-
-    if operation_type == OperationType.Binary:
-        operands = map(isValidOperand, result)
-    else:
-        operands = isValidOperand(result),
-
-    return all(operands)

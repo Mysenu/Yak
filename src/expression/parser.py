@@ -1,12 +1,29 @@
+from enum import IntEnum
 from typing import Optional
 
-from src.expression.utils import ALL_OPS, OperationType, ALWAYS_LEFT_UNARY, BINARY_OPS, VALID_CHARS, RIGHT_UNARY_OPS, \
-    LEFT_UNARY_OPS, ScanDirection, ALWAYS_BINARY_OPS, ALWAYS_RIGHT_UNARY
-from src.expression.subexpression import SubExpression, SubExpressionPair
+from .subexpression import SubExpression, SubExpressionPair
+
+
+ALWAYS_LEFT_UNARY = '√'
+ALWAYS_RIGHT_UNARY = '%'
+LEFT_UNARY_OPS = set('-+√')
+RIGHT_UNARY_OPS = set('%')
+BINARY_OPS = set('+-*/^')
+BRACKETS = set('()')
+ALWAYS_BINARY_OPS = BINARY_OPS - (RIGHT_UNARY_OPS | LEFT_UNARY_OPS)
+ALL_OPS = BINARY_OPS | LEFT_UNARY_OPS | RIGHT_UNARY_OPS
+MIDDLE_OPERAND_PART_CHARS = set('0123456789. ') | BRACKETS
+VALID_CHARS = MIDDLE_OPERAND_PART_CHARS | ALL_OPS
 
 
 def isOperation(text: str, index: int) -> bool:
     return text[index] in ALL_OPS
+
+
+class OperationType(IntEnum):
+    Binary = 1
+    LeftUnary = 2
+    RightUnary = 3
 
 
 def operationType(text: str, index: int) -> Optional[OperationType]:
@@ -58,6 +75,11 @@ def operationType(text: str, index: int) -> Optional[OperationType]:
                 return OperationType.LeftUnary
 
     return OperationType.Binary
+
+
+class ScanDirection(IntEnum):
+    Left = 1
+    Right = 2
 
 
 def findOperand(expr: str,
