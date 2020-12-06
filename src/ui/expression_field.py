@@ -8,7 +8,7 @@ from src.expression import fromEditableExpr, toEditableExpr
 
 class ExpressionField(QLineEdit):
     valid_keys = {Qt.Key_Backspace, Qt.Key_Enter, Qt.Key_Return, Qt.Key_C, Qt.Key_V, Qt.Key_X,
-                  Qt.Key_Right, Qt.Key_Left, Qt.Key_Delete, Qt.Key_Home, Qt.Key_End}
+                  Qt.Key_A, Qt.Key_Right, Qt.Key_Left, Qt.Key_Delete, Qt.Key_Home, Qt.Key_End}
 
     def __init__(self):
         super(ExpressionField, self).__init__()
@@ -82,8 +82,10 @@ class ExpressionField(QLineEdit):
 
                 clipboard = QApplication.clipboard()
                 clipboard.setText(text_to_copy)
+            elif event.matches(QKeySequence.SelectAll):
+                super().keyPressEvent(event)
             else:
-                if event.key() in (Qt.Key_C, Qt.Key_V, Qt.Key_X):
+                if event.key() in (Qt.Key_C, Qt.Key_V, Qt.Key_X, Qt.Key_A):
                     return
 
                 super().keyPressEvent(event)
