@@ -59,7 +59,7 @@ def operationType(text: str, index: int) -> Optional[OperationType]:
             return OperationType.Binary
 
     if char in LEFT_UNARY_OPS:
-        if prev_char in BINARY_OPS or prev_char == '(':
+        if prev_char in BINARY_OPS or prev_char in (set(ALWAYS_LEFT_UNARY) | BRACKETS):
             return OperationType.LeftUnary
 
         while not next_char:
@@ -71,7 +71,7 @@ def operationType(text: str, index: int) -> Optional[OperationType]:
             else:
                 next_char = text[prev_index]
 
-            if next_char.isdigit() and next_char in '(√':
+            if next_char.isdigit() and next_char in (set(ALWAYS_LEFT_UNARY) | BRACKETS):
                 return OperationType.LeftUnary
 
     return OperationType.Binary
