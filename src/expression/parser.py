@@ -117,7 +117,7 @@ def findOperand(expr: str,
     abs_pos = start_index
     with_unary_op = True
 
-    while expr[abs_pos] in (ALWAYS_RIGHT_UNARY + ALWAYS_LEFT_UNARY):
+    while expr[abs_pos] in (ALWAYS_RIGHT_UNARY + ALWAYS_LEFT_UNARY) or expr[abs_pos] == ' ':
         if direction == ScanDirection.Right:
             abs_pos += 1
         else:
