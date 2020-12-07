@@ -37,10 +37,6 @@ def isValidExpression(expr: str) -> bool:
     index = 0
     while index < len(expr):
         char = expr[index]
-        # print(f'Char: {char} ; index: {index}')
-        # print(f'In operand: {in_operand}')
-        # print(f'Operand part: {operand_part.name}')
-        # print(f'Operand counter: {operand_counter}')
         if char in BRACKETS:
             if char == '(':
                 bracket_counter += 1
@@ -145,23 +141,15 @@ def isValidExpression(expr: str) -> bool:
 
         else:  # not in_operand:
             if char in ALL_OPS:
-                if char in LEFT_UNARY_OPS:
-                    if operand_counter == 0:
-                        in_operand = True
-                        operand_counter += 1
-                        operand_part = OperandPart.Left
-                        dot_counter = 0
-                        prev_char_is_root = True
-                    else:
-                        return False
-
-                if char in BINARY_OPS:
-                    if operand_counter == 1:
-                        operand_counter = 0
-                    else:
-                        return False
-
-                if char in RIGHT_UNARY_OPS:
+                if char in LEFT_UNARY_OPS and operand_counter == 0:
+                    in_operand = True
+                    operand_counter += 1
+                    operand_part = OperandPart.Left
+                    dot_counter = 0
+                    prev_char_is_root = True
+                elif char in BINARY_OPS and operand_counter == 1:
+                    operand_counter = 0
+                else:
                     return False
             elif char in MIDDLE_OPERAND_PART_CHARS:
                 if char == '0':
@@ -182,13 +170,6 @@ def isValidExpression(expr: str) -> bool:
             return False
 
         index += 1
-    #
-    # print()
-    # print(f'Last In operand: {in_operand}')
-    # print(f'Last Operand part: {operand_part.name}')
-    # print(f'Last Bracket count: {bracket_counter}')
-    # print(f'Last Operand count: {operand_counter}')
-    # print()
 
     if bracket_counter > 0:
         return False
