@@ -80,6 +80,7 @@ def isValidExpression(expr: str) -> bool:
             if operand_part is OperandPart.Left:
                 if char in ALL_OPS:
                     if prev_char_is_root and char == '-':
+                        print(prev_char_is_root)
                         return False
                     if char not in LEFT_UNARY_OPS:
                         return False
@@ -146,7 +147,8 @@ def isValidExpression(expr: str) -> bool:
                     operand_counter += 1
                     operand_part = OperandPart.Left
                     dot_counter = 0
-                    prev_char_is_root = True
+                    if char in ALWAYS_LEFT_UNARY:
+                        prev_char_is_root = True
                 elif char in BINARY_OPS and operand_counter == 1:
                     operand_counter = 0
                 else:
