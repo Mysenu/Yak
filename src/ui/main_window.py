@@ -1,6 +1,6 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, qApp, QSizePolicy, QGridLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, qApp, QSizePolicy, QGridLayout, QSplitter
 
 from src.expression import calculateExpr
 from src.history import HistoryListModel, HistoryListView
@@ -8,22 +8,21 @@ from src.history import ExpressionRole
 from .expression_field import ExpressionField
 
 
-class MainWindow(QWidget):
+class MainWindow(QSplitter):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         self.setWindowTitle('Calculator')
         self.resize(600, 400)
-
-        main_layout = QHBoxLayout(self)
-        main_layout.setContentsMargins(4, 4, 4, 4)
-        main_layout.setSpacing(4)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         # Калькулятор
-        calc_layout = QVBoxLayout(self)
+        calc_widget = QWidget()
+        self.addWidget(calc_widget)
+
+        calc_layout = QVBoxLayout(calc_widget)
         calc_layout.setContentsMargins(4, 4, 4, 4)
         calc_layout.setSpacing(4)
-        main_layout.addLayout(calc_layout)
 
         # Поле ввода
         self.entry_field = ExpressionField()
@@ -184,10 +183,12 @@ class MainWindow(QWidget):
         self.result_button.clicked.connect(self._onEvalButtonClick)
 
         # История
-        history_layout = QVBoxLayout(self)
+        history_widget = QWidget()
+        self.addWidget(history_widget)
+
+        history_layout = QVBoxLayout(history_widget)
         history_layout.setContentsMargins(4, 4, 4, 4)
         history_layout.setSpacing(4)
-        main_layout.addLayout(history_layout)
 
         self.history_list_model = HistoryListModel()
         self.history_list_view = HistoryListView()
@@ -248,6 +249,3 @@ class MainWindow(QWidget):
     def _setExpressionFromHistory(self) -> None:
         expr = self.history_list_view.currentIndex().data(ExpressionRole)
         self.entry_field.setText(expr)
-
-    def resizeEvent(self, event: QResizeEvent) -> None:
-        pass
