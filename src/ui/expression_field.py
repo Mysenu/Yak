@@ -12,7 +12,7 @@ class ExpressionField(QLineEdit):
 
         self.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         font = self.font()
-        font.setFamily('Segoe UI')
+        font.setFamily('monospace [Consolas]')
         font.setPointSize(14)
         self.setFont(font)
         self.textChanged.connect(self._autoFormat)

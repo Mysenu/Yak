@@ -13,6 +13,11 @@ class HistoryListView(QListView):
         self.setMovement(QListView.Snap)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
+        font = self.font()
+        font.setFamily('monospace [Consolas]')
+        font.setPointSize(9.5)
+        self.setFont(font)
+
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showContextMenu)
 
