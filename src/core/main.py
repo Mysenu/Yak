@@ -1,6 +1,6 @@
 import sys
 
-from .application import Application
+from src.core.application import Application
 
 
 def my_excepthook(type, value, tback) -> None:
