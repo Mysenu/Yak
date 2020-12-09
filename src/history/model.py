@@ -106,7 +106,7 @@ class HistoryListModel(QAbstractListModel):
         else:
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDropEnabled
 
-    def supportedDropActions(self) -> typing.Union[int, typing.Iterable[int]]:
+    def supportedDropActions(self) -> int:
         return Qt.MoveAction
 
     def canDropMimeData(self, data: QMimeData, action: int, row: int, column: int, parent: QModelIndex) -> bool:
