@@ -104,7 +104,7 @@ class MainWindow(QSplitter):
         self.nine_button.setMinimumSize(25, 25)
         self.nine_button.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
 
-        self.multiplication_button = QPushButton('*')
+        self.multiplication_button = QPushButton('×')
         action_layout.addWidget(self.multiplication_button, 2, 3)
         self.multiplication_button.clicked.connect(self._onButtonClick)
         self.multiplication_button.setMinimumSize(25, 25)

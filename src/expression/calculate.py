@@ -1,6 +1,7 @@
 from math import sqrt, pow
 from typing import Union, Optional
 
+from .utils import toEditableExpr
 from .parser import RIGHT_UNARY_OPS
 from .parser import findOperand, findOperands, ScanDirection
 from .validation import isValidExpression
@@ -63,4 +64,4 @@ def convertToPyExpr(raw_expr: str) -> str:
         index += 1
         return convertToPyExpr(expr)
     else:
-        return raw_expr
+        return toEditableExpr(raw_expr)
