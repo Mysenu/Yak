@@ -17,6 +17,10 @@ class MainWindow(QSplitter):
         self.resize(600, 400)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
+        font = self.font()
+        font.setFamily('monospace [Consolas]')
+        self.setFont(font)
+
         # Калькулятор
         calc_widget = QWidget()
         self.addWidget(calc_widget)

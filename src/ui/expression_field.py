@@ -11,10 +11,7 @@ class ExpressionField(QLineEdit):
         super(ExpressionField, self).__init__()
 
         self.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        font = self.font()
-        font.setFamily('monospace [Consolas]')
-        font.setPointSize(14)
-        self.setFont(font)
+
         self.textChanged.connect(self._autoFormat)
 
     def _autoFormat(self, expr: str):
