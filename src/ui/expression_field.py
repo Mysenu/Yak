@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QKeyEvent, QKeySequence, QDropEvent
+from PyQt5.QtGui import QKeyEvent, QKeySequence, QDropEvent, QResizeEvent
 from PyQt5.QtWidgets import QLineEdit, QApplication
 
 from src.expression import VALID_CHARS
@@ -83,3 +83,11 @@ class ExpressionField(QLineEdit):
 
     def dropEvent(self, data: QDropEvent) -> None:
         self.insert(data.mimeData().text())
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+
+        font_size = self.height() * 0.4
+        font = self.font()
+        font.setPointSize(int(font_size))
+        self.setFont(font)

@@ -14,7 +14,7 @@ class MainWindow(QSplitter):
         super(MainWindow, self).__init__()
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         self.setWindowTitle('Calculator')
-        self.resize(600, 400)
+        self.resize(450, 300)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         font = self.font()
@@ -139,3 +139,11 @@ class MainWindow(QSplitter):
     def _setExpressionFromHistory(self) -> None:
         expr = self.history_list_view.currentIndex().data(ExpressionRole)
         self.entry_field.setText(expr)
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+
+        self.entry_field.setFixedHeight(int(self.height() * 0.13))  # 50 / 380 (entry_field.height / MainWindow.height)
+        font = self.font()
+        font.setPointSize(self.height() * 0.13 * 0.4)
+        self.history_list_view.setFont(font)

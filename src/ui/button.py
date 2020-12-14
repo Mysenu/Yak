@@ -13,3 +13,12 @@ class Button(QPushButton):
         self.setMinimumSize(25, 25)
         self.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,
                                        QSizePolicy.Minimum))
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+
+        size = min(self.width(), self.height())
+        font_size = size * 0.33  # 50 / 16 (button size / font size)
+        font = self.font()
+        font.setPointSize(int(font_size))
+        self.setFont(font)
