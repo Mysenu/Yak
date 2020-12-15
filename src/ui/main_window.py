@@ -120,8 +120,29 @@ class MainWindow(QSplitter):
         self.addWidget(self.history_list_view)
 
     def _onButtonClick(self) -> None:
-        char_to_add = qApp.sender().text()
-        self.entry_field.insert(char_to_add)
+        button = qApp.sender()
+        self.entry_field.insert({
+            self.power_button: '^',
+            self.square_root_button: 'V',
+            self.percent_button: '%',
+            self.division_button: '/',
+            self.multiplication_button: '*',
+            self.plus_button: '+',
+            self.minus_button: '-',
+            self.one_button: '1',
+            self.two_button: '2',
+            self.three_button: '3',
+            self.four_button: '4',
+            self.five_button: '5',
+            self.six_button: '6',
+            self.seven_button: '7',
+            self.eight_button: '8',
+            self.nine_button: '9',
+            self.zero_button: '0',
+            self.dot_button: '.',
+            self.open_bracket_button: '(',
+            self.close_bracket_button: ')'
+                                }[button])
 
     def _calculateCurrentExpression(self) -> None:
         result = calculateExpr(self.entry_field.text())
