@@ -18,7 +18,8 @@ class MainWindow(QSplitter):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         font = self.font()
-        font.setFamily('monospace [Consolas]')
+        font.setFamily('Consolas')
+        font.setStyleHint(QFont.Monospace)
         self.setFont(font)
 
         # Калькулятор
