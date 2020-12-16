@@ -16,6 +16,8 @@ class HistoryListView(QListView):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showContextMenu)
 
+        self.setFocusPolicy(Qt.NoFocus)
+
         # Menus
         self._context_menu = None
         self._copy_submenu = None

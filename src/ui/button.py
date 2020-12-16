@@ -14,6 +14,8 @@ class Button(QPushButton):
         self.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,
                                        QSizePolicy.Minimum))
 
+        self.setFocusPolicy(Qt.NoFocus)
+
     def resizeEvent(self, event: QResizeEvent) -> None:
         super().resizeEvent(event)
 
