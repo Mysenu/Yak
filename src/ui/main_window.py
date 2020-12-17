@@ -15,7 +15,6 @@ class MainWindow(QSplitter):
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         self.setWindowTitle('Calculator')
         self.resize(450, 300)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         font = self.font()
         font.setFamily('Consolas')
@@ -31,7 +30,8 @@ class MainWindow(QSplitter):
         calc_layout = QVBoxLayout(calc_widget)
         calc_layout.setContentsMargins(4, 4, 4, 4)
         calc_layout.setSpacing(4)
-        calc_widget.setMinimumSize(250, 350)
+        calc_widget.setMinimumSize(200, 350)
+        calc_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         # Поле ввода
         self.entry_field = ExpressionField()
@@ -123,6 +123,8 @@ class MainWindow(QSplitter):
 
         self.addWidget(self.history_list_view)
 
+        self.history_list_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+
         self.setHandleWidth(1)
         self.setStretchFactor(0, 5)
         self.setStretchFactor(1, 5)
@@ -177,9 +179,9 @@ class MainWindow(QSplitter):
         font.setPointSize(self.height() * 0.13 * 0.4)
         self.history_list_view.setFont(font)
 
-        if self.size().width() == 340 and not self._simple_mode:
+        if self.size().width() < 400 and not self._simple_mode:
             self.setSizes([1, 0])
             self._simple_mode = True
-        elif self.size().width() > 341 and self._simple_mode:
+        elif self.size().width() > 400 and self._simple_mode:
             self.setSizes([1, 1])
             self._simple_mode = False
