@@ -22,6 +22,8 @@ class MainWindow(QSplitter):
         font.setStyleHint(QFont.Monospace)
         self.setFont(font)
 
+        self._simple_mode = False
+
         # Калькулятор
         calc_widget = QWidget()
         self.addWidget(calc_widget)
@@ -29,6 +31,7 @@ class MainWindow(QSplitter):
         calc_layout = QVBoxLayout(calc_widget)
         calc_layout.setContentsMargins(4, 4, 4, 4)
         calc_layout.setSpacing(4)
+        calc_widget.setMinimumSize(250, 350)
 
         # Поле ввода
         self.entry_field = ExpressionField()
@@ -173,3 +176,10 @@ class MainWindow(QSplitter):
         font = self.font()
         font.setPointSize(self.height() * 0.13 * 0.4)
         self.history_list_view.setFont(font)
+
+        if self.size().width() == 340 and not self._simple_mode:
+            self.setSizes([1, 0])
+            self._simple_mode = True
+        elif self.size().width() > 341 and self._simple_mode:
+            self.setSizes([1, 1])
+            self._simple_mode = False
