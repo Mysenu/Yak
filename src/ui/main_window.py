@@ -120,6 +120,10 @@ class MainWindow(QSplitter):
 
         self.addWidget(self.history_list_view)
 
+        self.setHandleWidth(1)
+        self.setStretchFactor(0, 5)
+        self.setStretchFactor(1, 5)
+
     def _onButtonClick(self) -> None:
         button = qApp.sender()
         self.entry_field.insert({
