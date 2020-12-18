@@ -184,8 +184,7 @@ class MainWindow(QSplitter):
         font = self.font()
         font.setPointSize(self.height() * 0.13 * 0.4)
         self.history_list_view.setFont(font)
-        print(self._minimum_window_width * 2)
-        print(self.size())
+
         if self.width() < (self._minimum_window_width * 4) and not self._no_history:
             self.setSizes([1, 0])
             self._no_history = True
