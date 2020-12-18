@@ -21,7 +21,12 @@ class MainWindow(QSplitter):
         font.setStyleHint(QFont.Monospace)
         self.setFont(font)
 
-        self._simple_mode = False
+        self._no_history = False
+
+        self._minimum_window_width = 80
+        self._minimum_window_height = 175
+
+        self.setMinimumSize(self._minimum_window_width, self._minimum_window_height)
 
         # Калькулятор
         calc_widget = QWidget()
@@ -30,7 +35,7 @@ class MainWindow(QSplitter):
         calc_layout = QVBoxLayout(calc_widget)
         calc_layout.setContentsMargins(4, 4, 4, 4)
         calc_layout.setSpacing(4)
-        calc_widget.setMinimumSize(200, 350)
+        calc_widget.setMinimumSize(self._minimum_window_width, self._minimum_window_height)
         calc_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         # Поле ввода
@@ -120,6 +125,7 @@ class MainWindow(QSplitter):
         self.history_list_model = HistoryListModel()
         self.history_list_view = HistoryListView()
         self.history_list_view.setModel(self.history_list_model)
+        self.history_list_view.setMinimumSize(self._minimum_window_width, self._minimum_window_height)
 
         self.addWidget(self.history_list_view)
 
@@ -178,10 +184,11 @@ class MainWindow(QSplitter):
         font = self.font()
         font.setPointSize(self.height() * 0.13 * 0.4)
         self.history_list_view.setFont(font)
-
-        if self.size().width() < 400 and not self._simple_mode:
+        print(self._minimum_window_width * 2)
+        print(self.size())
+        if self.width() < (self._minimum_window_width * 4) and not self._no_history:
             self.setSizes([1, 0])
-            self._simple_mode = True
-        elif self.size().width() > 400 and self._simple_mode:
+            self._no_history = True
+        elif self.width() > (self._minimum_window_width * 4) and self._no_history:
             self.setSizes([1, 1])
-            self._simple_mode = False
+            self._no_history = False
