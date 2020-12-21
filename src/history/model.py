@@ -4,7 +4,7 @@ from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData
 from PyQt5.QtWidgets import QFileDialog
 
 from src.expression import calculateExpr, isValidExpression, toEditableExpr, fromEditableExpr
-from .utils import saveHistoryToFile, saveHistoryToCacheFile
+from .utils import saveHistoryToFile, saveHistoryToCacheFile, clearHistoryCacheFile
 
 ExpressionRole = Qt.UserRole
 ResultRole = Qt.UserRole + 1
@@ -58,6 +58,7 @@ class HistoryListModel(QAbstractListModel):
     def clear(self) -> None:
         self.beginResetModel()
         self._expressions.clear()
+        clearHistoryCacheFile()
         self.endResetModel()
 
     def saveHistory(self) -> None:

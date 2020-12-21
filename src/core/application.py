@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
 
-from src.history.utils import readHistoryCacheFile, CACHE_DIR
+from src.history.utils import readHistoryCacheFile, clearHistoryCacheFile
 from src.ui import MainWindow
 
 
@@ -24,4 +24,4 @@ class Application(QApplication):
             if expressions:
                 self.main_window.history_list_model.addExpressions(expressions)
         else:
-            open(CACHE_DIR / 'calc', 'w').close()
+            clearHistoryCacheFile()

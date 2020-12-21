@@ -5,6 +5,7 @@ from pathlib import Path
 
 
 CACHE_DIR = Path(QStandardPaths.writableLocation(QStandardPaths.CacheLocation))
+HISTORY_CACHE_FILE = 'calc'
 
 
 def saveHistoryToFile(expressions: List[str], file_path: str) -> None:
@@ -18,7 +19,7 @@ def saveHistoryToCacheFile(expression: str) -> None:
     except OSError:
         exit(2)
 
-    file_path = CACHE_DIR / 'calc'
+    file_path = CACHE_DIR / HISTORY_CACHE_FILE
 
     if file_path.exists():
         with open(file_path, 'a') as file:
@@ -30,7 +31,7 @@ def saveHistoryToCacheFile(expression: str) -> None:
 
 def readHistoryCacheFile() -> Optional[List[str]]:
 
-    file_path = CACHE_DIR / 'calc'
+    file_path = CACHE_DIR / HISTORY_CACHE_FILE
 
     if file_path.exists():
         with open(file_path, 'r') as file:
@@ -39,3 +40,7 @@ def readHistoryCacheFile() -> Optional[List[str]]:
         return
 
     return expressions.split('\n')
+
+
+def clearHistoryCacheFile() -> None:
+    open(CACHE_DIR / HISTORY_CACHE_FILE, 'w').close()
