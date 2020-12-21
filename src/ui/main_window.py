@@ -9,6 +9,10 @@ from .button import Button
 from .expression_field import ExpressionField
 
 
+MINIMUM_WINDOW_WIDTH = 80
+MINIMUM_WINDOW_HEIGHT = 175
+
+
 class MainWindow(QSplitter):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -24,10 +28,7 @@ class MainWindow(QSplitter):
         self._no_history = False
         self._one_widget = False
 
-        self._minimum_window_width = 80
-        self._minimum_window_height = 175
-
-        self.setMinimumSize(self._minimum_window_width, self._minimum_window_height)
+        self.setMinimumSize(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT)
 
         # Калькулятор
         calc_widget = QWidget()
@@ -36,7 +37,7 @@ class MainWindow(QSplitter):
         calc_layout = QVBoxLayout(calc_widget)
         calc_layout.setContentsMargins(4, 4, 4, 4)
         calc_layout.setSpacing(4)
-        calc_widget.setMinimumSize(self._minimum_window_width, self._minimum_window_height)
+        calc_widget.setMinimumSize(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT)
         calc_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         # Поле ввода
@@ -126,7 +127,7 @@ class MainWindow(QSplitter):
         self.history_list_model = HistoryListModel()
         self.history_list_view = HistoryListView()
         self.history_list_view.setModel(self.history_list_model)
-        self.history_list_view.setMinimumSize(self._minimum_window_width, self._minimum_window_height)
+        self.history_list_view.setMinimumSize(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT)
 
         self.addWidget(self.history_list_view)
 
@@ -188,7 +189,7 @@ class MainWindow(QSplitter):
 
         calc, history = self.sizes()
         if not self._one_widget:
-            if self.width() < (self._minimum_window_width * 4):
+            if self.width() < (MINIMUM_WINDOW_WIDTH * 4):
                 if not self._no_history:
                     self.setSizes([1, 0])
                     self._no_history = True
@@ -197,7 +198,7 @@ class MainWindow(QSplitter):
                     self._one_widget = True
                     self._no_history = False
 
-            elif self.width() > (self._minimum_window_width * 4):
+            elif self.width() > (MINIMUM_WINDOW_WIDTH * 4):
                 if self._no_history:
                     self.setSizes([1, 1])
                     self._no_history = False
