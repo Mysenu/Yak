@@ -187,9 +187,10 @@ class MainWindow(QSplitter):
         font.setPointSize(self.height() * 0.13 * 0.4)
         self.history_list_view.setFont(font)
 
+        minimum_window_size_to_change = MINIMUM_WINDOW_WIDTH * 4  # Twice the size of the minimum size of the window
         calc_size, history_size = self.sizes()
         if not self._one_widget:
-            if self.width() < (MINIMUM_WINDOW_WIDTH * 4):
+            if self.width() < minimum_window_size_to_change:
                 if not self._no_history:
                     self.setSizes([1, 0])
                     self._no_history = True
@@ -198,7 +199,7 @@ class MainWindow(QSplitter):
                     self._one_widget = True
                     self._no_history = False
 
-            elif self.width() > (MINIMUM_WINDOW_WIDTH * 4):
+            elif self.width() > minimum_window_size_to_change:
                 if self._no_history:
                     self.setSizes([1, 1])
                     self._no_history = False
