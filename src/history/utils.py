@@ -21,7 +21,7 @@ def saveHistoryToCacheFile(expression: str) -> None:
 
     file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
 
-    if file_path.exists():
+    if file_path.exists() and (file_path.stat().st_size > 0):
         with open(file_path, 'a') as file:
             file.write('\n' + expression)
     else:
