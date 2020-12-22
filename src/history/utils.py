@@ -1,11 +1,11 @@
 from typing import List, Optional
+from pathlib import Path
 
 from PyQt5.QtCore import QStandardPaths
-from pathlib import Path
 
 
 CACHE_DIR = Path(QStandardPaths.writableLocation(QStandardPaths.CacheLocation))
-HISTORY_CACHE_FILE = 'calc'
+HISTORY_CACHE_FILE_NAME = 'calc'
 
 
 def saveHistoryToFile(expressions: List[str], file_path: str) -> None:
@@ -17,9 +17,9 @@ def saveHistoryToCacheFile(expression: str) -> None:
     try:
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
     except OSError:
-        exit(2)
+        exit(1)
 
-    file_path = CACHE_DIR / HISTORY_CACHE_FILE
+    file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
 
     if file_path.exists():
         with open(file_path, 'a') as file:
@@ -30,8 +30,7 @@ def saveHistoryToCacheFile(expression: str) -> None:
 
 
 def readHistoryCacheFile() -> Optional[List[str]]:
-
-    file_path = CACHE_DIR / HISTORY_CACHE_FILE
+    file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
 
     if file_path.exists():
         with open(file_path, 'r') as file:
@@ -43,4 +42,4 @@ def readHistoryCacheFile() -> Optional[List[str]]:
 
 
 def clearHistoryCacheFile() -> None:
-    open(CACHE_DIR / HISTORY_CACHE_FILE, 'w').close()
+    open(CACHE_DIR / HISTORY_CACHE_FILE_NAME, 'w').close()
