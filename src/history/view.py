@@ -16,50 +16,67 @@ class HistoryListView(QListView):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showContextMenu)
 
-        self.setFocusPolicy(Qt.NoFocus)
-
         # Menus
         self._context_menu = None
         self._copy_submenu = None
 
         # Actions
+        self._copy_equations_action = None
+        self._copy_expressions_action = None
+        self._copy_results_action = None
+        self._cut_equations_action = None
+        self._edit_expression_action = None
+        self._delete_action = None
+        self._clear_action = None
+        self._save_action = None
+
+        self._namingActions()
+        self._assigningShortcutsToActions()
+        self._assigningSlotsForActions()
+
+    def _namingActions(self) -> None:
         self._copy_equations_action = QAction('Equations')
-        self._copy_equations_action.setShortcut(QKeySequence.Copy)
-        self._copy_equations_action.triggered.connect(self._copySelectedEquations)
+        self.addAction(self._copy_equations_action)
 
         self._copy_expressions_action = QAction('Expressions')
-        self._copy_expressions_action.setShortcut(Qt.CTRL + Qt.ALT + Qt.Key_C)
-        self._copy_expressions_action.triggered.connect(self._copySelectedExpressions)
         self.addAction(self._copy_expressions_action)
 
         self._copy_results_action = QAction('Results')
-        self._copy_results_action.setShortcut(Qt.CTRL + Qt.SHIFT + Qt.Key_C)
-        self._copy_results_action.triggered.connect(self._copySelectedResults)
         self.addAction(self._copy_results_action)
 
         self._cut_equations_action = QAction('Cut equations')
-        self._cut_equations_action.setShortcut(QKeySequence.Cut)
-        self._cut_equations_action.triggered.connect(self._cutSelectedEquations)
         self.addAction(self._cut_equations_action)
 
         self._edit_expression_action = QAction('Edit expression')
-        self._edit_expression_action.setShortcut(Qt.CTRL + Qt.Key_E)
-        self._edit_expression_action.triggered.connect(self._editSelectedExpression)
         self.addAction(self._edit_expression_action)
 
         self._delete_action = QAction('Delete')
-        self._delete_action.setShortcut(QKeySequence.Delete)
-        self._delete_action.triggered.connect(self._deleteSelectedEquations)
         self.addAction(self._delete_action)
 
         self._clear_action = QAction('Clear')
-        self._clear_action.triggered.connect(self.clear)
         self.addAction(self._clear_action)
 
         self._save_action = QAction('Save')
-        self._save_action.setShortcut(QKeySequence.Save)
-        self._save_action.triggered.connect(self._saveHistory)
         self.addAction(self._save_action)
+
+    def _assigningShortcutsToActions(self) -> None:
+        self._copy_equations_action.setShortcut(QKeySequence.Copy)
+        self._copy_expressions_action.setShortcut(Qt.CTRL + Qt.ALT + Qt.Key_C)
+        self._copy_results_action.setShortcut(Qt.CTRL + Qt.SHIFT + Qt.Key_C)
+        self._cut_equations_action.setShortcut(QKeySequence.Cut)
+        self._edit_expression_action.setShortcut(Qt.CTRL + Qt.Key_E)
+        self._delete_action.setShortcut(QKeySequence.Delete)
+        self._save_action.setShortcut(QKeySequence.Save)
+
+    def _assigningSlotsForActions(self) -> None:
+        self._copy_equations_action.triggered.connect(self._copySelectedEquations)
+        self._copy_expressions_action.triggered.connect(self._copySelectedExpressions)
+        self._copy_results_action.triggered.connect(self._copySelectedResults)
+        self._cut_equations_action.triggered.connect(self._cutSelectedEquations)
+        self._edit_expression_action.triggered.connect(self._editSelectedExpression)
+        self._delete_action.triggered.connect(self._deleteSelectedEquations)
+        self._clear_action.triggered.connect(self.clear)
+        self._save_action.triggered.connect(self._saveHistory)
 
     def _deleteSelectedEquations(self) -> None:
         for index in reversed(sorted(self.selectedIndexes(), key=QModelIndex.row)):
