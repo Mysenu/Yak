@@ -13,13 +13,14 @@ class Application(QApplication):
         self.main_window = MainWindow()
         self.main_window.show()
 
-        self.addHistoryCacheToHistory(self.restoreHistory())
+        self.addHistoryCacheToHistory(self.needToRestoreHistory())
 
-    def restoreHistory(self) -> QMessageBox:
-        return QMessageBox.question(MainWindow(), 'Restore history', 'Restore calculation history?')
+    def needToRestoreHistory(self) -> bool:
+        answer = QMessageBox.question(MainWindow(), 'Restore history', 'Restore calculation history?')
+        return answer == QMessageBox.Yes
 
-    def addHistoryCacheToHistory(self, restore_history: QMessageBox) -> None:
-        if restore_history == QMessageBox.Yes:
+    def addHistoryCacheToHistory(self, answer: bool) -> None:
+        if answer:
             expressions = readHistoryCacheFile()
             if expressions:
                 self.main_window.history_list_model.addExpressions(expressions)
