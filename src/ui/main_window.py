@@ -25,6 +25,8 @@ class MainWindow(QSplitter):
         font.setStyleHint(QFont.Monospace)
         self.setFont(font)
 
+        self.setFocusPolicy(Qt.StrongFocus)
+
         self._no_history = False
         self._one_widget = False
 
@@ -209,3 +211,6 @@ class MainWindow(QSplitter):
                 self._one_widget = True
             else:
                 self._one_widget = False
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        self.entry_field.keyPressEvent(event)
