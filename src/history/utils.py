@@ -14,7 +14,10 @@ def saveHistoryToFile(expressions: List[str], file_path: str) -> None:
 
 
 def saveHistoryToCacheFile(expression: str) -> None:
-    directoryCheck(CACHE_DIR)
+    try:
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        exit(1)
 
     file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
 
@@ -27,7 +30,10 @@ def saveHistoryToCacheFile(expression: str) -> None:
 
 
 def readHistoryCache() -> List[str]:
-    directoryCheck(CACHE_DIR)
+    try:
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        exit(1)
 
     file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
 
@@ -41,16 +47,7 @@ def readHistoryCache() -> List[str]:
 
 
 def clearHistoryCacheFile() -> None:
-    directoryCheck(CACHE_DIR)
-
     file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
 
     if file_path.exists():
         open(CACHE_DIR / HISTORY_CACHE_FILE_NAME, 'w').close()
-
-
-def directoryCheck(path: Path) -> None:
-    try:
-        path.mkdir(parents=True, exist_ok=True)
-    except OSError:
-        exit(1)
