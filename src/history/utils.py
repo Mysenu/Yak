@@ -26,7 +26,7 @@ def saveHistoryToCacheFile(expression: str) -> None:
             file.write(expression)
 
 
-def readHistoryCacheFile() -> Optional[List[str]]:
+def readHistoryCache() -> List[str]:
     directoryCheck(CACHE_DIR)
 
     file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
@@ -35,7 +35,7 @@ def readHistoryCacheFile() -> Optional[List[str]]:
         with open(file_path, 'r') as file:
             expressions = file.read()
     else:
-        return
+        return []
 
     return expressions.split('\n')
 

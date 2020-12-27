@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
 
-from src.history.utils import readHistoryCacheFile, clearHistoryCacheFile
+from src.history.utils import readHistoryCache, clearHistoryCacheFile
 from src.ui import MainWindow
 
 
@@ -21,7 +21,7 @@ class Application(QApplication):
 
     def addHistoryCacheToHistory(self, answer: bool) -> None:
         if answer:
-            expressions = readHistoryCacheFile()
+            expressions = readHistoryCache()
             if expressions:
                 self.main_window.history_list_model.addExpressions(expressions)
         else:
