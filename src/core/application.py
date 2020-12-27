@@ -17,7 +17,7 @@ class Application(QApplication):
             self.addHistoryCacheToHistory()
 
     def needToRestoreHistory(self) -> bool:
-        answer = QMessageBox.question(MainWindow(), 'Restore history', 'Restore calculation history?')
+        answer = QMessageBox.question(self.main_window, 'Restore history', 'Restore calculation history?')
         return answer == QMessageBox.Yes
 
     def addHistoryCacheToHistory(self) -> None:
