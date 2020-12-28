@@ -16,6 +16,8 @@ class HistoryListModel(QAbstractListModel):
 
         self._expressions = []
 
+        self.need_clear_history = True
+
     def addExpression(self, expr: str, index: int = 0, save_to_cache: bool = True) -> None:
         if not isValidExpression(expr):
             return
@@ -26,11 +28,18 @@ class HistoryListModel(QAbstractListModel):
             if latest_expr == expr:
                 return
 
+        if self.need_clear_history and self._expressions:
+            self.need_clear_history = False
+
         self.beginResetModel()
         self._expressions.insert(index, expr)
         self.endResetModel()
 
         if save_to_cache:
+            if self.need_clear_history:
+                clearHistoryCache()
+                self.need_clear_history = False
+
             saveHistoryToCache(expr)
 
     def addExpressions(self, expressions: list) -> None:
