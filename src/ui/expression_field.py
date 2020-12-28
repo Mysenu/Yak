@@ -10,8 +10,11 @@ class ExpressionField(QLineEdit):
     def __init__(self):
         super(ExpressionField, self).__init__()
 
+        self.setPlaceholderText('0')
         self.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-
+        margins = self.textMargins()
+        margins.setRight(3)
+        self.setTextMargins(margins)
         self.textChanged.connect(self._autoFormat)
 
     def _autoFormat(self, expr: str):
