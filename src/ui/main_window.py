@@ -19,18 +19,15 @@ class MainWindow(QSplitter):
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         self.setWindowTitle('Calculator')
         self.resize(450, 300)
+        self.setMinimumSize(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT)
 
         font = self.font()
         font.setFamily('Consolas')
         font.setStyleHint(QFont.Monospace)
         self.setFont(font)
 
-        self.setFocusPolicy(Qt.StrongFocus)
-
         self._no_history = False
         self._one_widget = False
-
-        self.setMinimumSize(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT)
 
         # Калькулятор
         calc_widget = QWidget()
@@ -214,3 +211,4 @@ class MainWindow(QSplitter):
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         self.entry_field.keyPressEvent(event)
+
