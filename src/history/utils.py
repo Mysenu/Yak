@@ -30,20 +30,14 @@ def saveHistoryToCache(expression: str) -> None:
 
 
 def readHistoryCache() -> List[str]:
-    try:
-        CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    except OSError:
-        exit(1)
-
     file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
 
     if file_path.exists():
         with open(file_path, 'r') as file:
             expressions = file.read()
+            return expressions.split('\n')
     else:
         return []
-
-    return expressions.split('\n')
 
 
 def clearHistoryCache() -> None:
