@@ -5,7 +5,7 @@ from PyQt5.QtCore import QStandardPaths
 
 
 CACHE_DIR = Path(QStandardPaths.writableLocation(QStandardPaths.CacheLocation))
-HISTORY_CACHE_FILE_NAME = 'calc'
+CACHE_FILE = CACHE_DIR / 'calc'
 
 
 def saveHistoryToFile(expressions: List[str], file_path: str) -> None:
@@ -19,21 +19,17 @@ def addExpressionToHistoryCache(expression: str) -> None:
     except OSError:
         exit(1)
 
-    file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
-
-    if file_path.exists() and (file_path.stat().st_size > 0):
-        with open(file_path, 'a') as file:
+    if CACHE_FILE.exists() and (CACHE_FILE.stat().st_size > 0):
+        with open(CACHE_FILE, 'a') as file:
             file.write('\n' + expression)
     else:
-        with open(file_path, 'w') as file:
+        with open(CACHE_FILE, 'w') as file:
             file.write(expression)
 
 
 def loadHistoryFromCache() -> List[str]:
-    file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
-
-    if file_path.exists():
-        with open(file_path, 'r') as file:
+    if CACHE_FILE.exists():
+        with open(CACHE_FILE, 'r') as file:
             expressions = file.read()
             return expressions.split('\n')
     else:
@@ -41,7 +37,5 @@ def loadHistoryFromCache() -> List[str]:
 
 
 def clearHistoryCache() -> None:
-    file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
-
-    if file_path.exists():
-        open(CACHE_DIR / HISTORY_CACHE_FILE_NAME, 'w').close()
+    if CACHE_FILE.exists():
+        open(CACHE_FILE, 'w').close()
