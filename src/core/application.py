@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
 
-from src.history.utils import loadHistoryFromCache, clearHistoryCache
+from src.history.utils import loadHistoryFromCache, clearHistoryCache, CACHE_FILE
 from src.ui import MainWindow
 
 
@@ -11,10 +11,11 @@ class Application(QApplication):
         super().__init__(args or [])
 
         self.main_window = MainWindow()
-        self.main_window.show()
 
-        if self.needToRestoreHistory():
+        if (CACHE_FILE.exists() and (CACHE_FILE.stat().st_size > 0)) and self.needToRestoreHistory():
             self.addHistoryCacheToHistory()
+            
+        self.main_window.show()
 
     def needToRestoreHistory(self) -> bool:
         answer = QMessageBox.question(self.main_window, 'Restore history', 'Restore calculation history?')
