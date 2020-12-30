@@ -13,7 +13,7 @@ def saveHistoryToFile(expressions: List[str], file_path: str) -> None:
         file.write('\n'.join(expressions))
 
 
-def saveHistoryToCache(expression: str) -> None:
+def addExpressionToHistoryCache(expression: str) -> None:
     try:
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
     except OSError:
@@ -29,7 +29,7 @@ def saveHistoryToCache(expression: str) -> None:
             file.write(expression)
 
 
-def readHistoryCache() -> List[str]:
+def loadHistoryFromCache() -> List[str]:
     file_path = CACHE_DIR / HISTORY_CACHE_FILE_NAME
 
     if file_path.exists():
