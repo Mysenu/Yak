@@ -210,5 +210,6 @@ class MainWindow(QSplitter):
                 self._one_widget = False
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
-        self.entry_field.keyPressEvent(event)
+        if not event.matches(QKeySequence.InsertParagraphSeparator):
+            self.entry_field.keyPressEvent(event)
 
