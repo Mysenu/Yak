@@ -36,26 +36,32 @@ class HistoryListView(QListView):
         self._copy_equations_action = QAction('Equations')
         self._copy_equations_action.triggered.connect(self._copySelectedEquations)
         self._copy_equations_action.setShortcut(QKeySequence.Copy)
+        self.addAction(self._copy_equations_action)
 
         self._copy_expressions_action = QAction('Expressions')
         self._copy_expressions_action.triggered.connect(self._copySelectedExpressions)
         self._copy_expressions_action.setShortcut(Qt.CTRL + Qt.ALT + Qt.Key_C)
+        self.addAction(self._copy_expressions_action)
 
         self._copy_results_action = QAction('Results')
         self._copy_results_action.triggered.connect(self._copySelectedResults)
         self._copy_results_action.setShortcut(Qt.CTRL + Qt.SHIFT + Qt.Key_C)
+        self.addAction(self._copy_results_action)
 
         self._cut_equations_action = QAction('Cut equations')
         self._cut_equations_action.triggered.connect(self._cutSelectedEquations)
         self._cut_equations_action.setShortcut(QKeySequence.Cut)
+        self.addAction(self._cut_equations_action)
 
         self._edit_expression_action = QAction('Edit expression')
         self._edit_expression_action.triggered.connect(self._editSelectedExpression)
         self._edit_expression_action.setShortcut(Qt.CTRL + Qt.Key_E)
+        self.addAction(self._edit_expression_action)
 
         self._delete_action = QAction('Delete')
         self._delete_action.triggered.connect(self._deleteSelectedEquations)
         self._delete_action.setShortcut(QKeySequence.Delete)
+        self.addAction(self._delete_action)
 
         self._clear_action = QAction('Clear')
         self._clear_action.triggered.connect(self.clear)
@@ -63,6 +69,7 @@ class HistoryListView(QListView):
         self._save_action = QAction('Save')
         self._save_action.triggered.connect(self._saveHistory)
         self._save_action.setShortcut(QKeySequence.Save)
+        self.addAction(self._save_action)
 
     def _deleteSelectedEquations(self) -> None:
         for index in reversed(sorted(self.selectedIndexes(), key=QModelIndex.row)):
