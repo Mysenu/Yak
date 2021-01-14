@@ -40,7 +40,11 @@ class ExpressionField(QLineEdit):
     def keyPressEvent(self, event: QKeyEvent):
         char = event.text()
         if (char and ord(char) in range(ord(' '), ord('~') + 1) or char.isalpha()) \
-                and event.modifiers() in (Qt.NoModifier, Qt.ShiftModifier):
+                and (event.modifiers() in (Qt.NoModifier, Qt.ShiftModifier)
+                     or event.modifiers() & Qt.AltModifier):
+            if event.modifiers() & Qt.AltModifier:
+                return
+
             if not (set(char) - (VALID_CHARS | set('vV'))):
                 self.insert(char)
         else:
