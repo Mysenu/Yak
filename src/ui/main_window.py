@@ -1,3 +1,6 @@
+import os
+
+from PyQt5 import QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, qApp, QSizePolicy, QGridLayout, QSplitter
@@ -18,6 +21,7 @@ class MainWindow(QSplitter):
         super(MainWindow, self).__init__()
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         self.setWindowTitle('Calculator')
+        self.setWindowIcon(QIcon(os.path.dirname(__file__) + "/resourse/window_icon.ico"))
         self.resize(450, 300)
         self.setMinimumSize(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT)
 
