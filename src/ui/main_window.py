@@ -210,6 +210,5 @@ class MainWindow(QSplitter):
                 self._one_widget = False
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
-        if not event.matches(QKeySequence.InsertParagraphSeparator) and not self.history_list_view.hasFocus():
+        if not event.matches(QKeySequence.InsertParagraphSeparator):
             self.entry_field.keyPressEvent(event)
-
