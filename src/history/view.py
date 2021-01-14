@@ -33,15 +33,15 @@ class HistoryListView(QListView):
         self._createActions()
 
     def _createActions(self) -> None:
-        self._copy_equations_action = QAction('Equations')
-        self._copy_equations_action.triggered.connect(self._copySelectedEquations)
-        self._copy_equations_action.setShortcut(QKeySequence.Copy)
-        self.addAction(self._copy_equations_action)
-
         self._copy_expressions_action = QAction('Expressions')
         self._copy_expressions_action.triggered.connect(self._copySelectedExpressions)
-        self._copy_expressions_action.setShortcut(Qt.CTRL + Qt.ALT + Qt.Key_C)
+        self._copy_expressions_action.setShortcut(QKeySequence.Copy)
         self.addAction(self._copy_expressions_action)
+
+        self._copy_equations_action = QAction('Equations')
+        self._copy_equations_action.triggered.connect(self._copySelectedEquations)
+        self._copy_equations_action.setShortcut(Qt.CTRL + Qt.ALT + Qt.Key_C)
+        self.addAction(self._copy_equations_action)
 
         self._copy_results_action = QAction('Results')
         self._copy_results_action.triggered.connect(self._copySelectedResults)
@@ -66,7 +66,7 @@ class HistoryListView(QListView):
         self._clear_action = QAction('Clear')
         self._clear_action.triggered.connect(self.clear)
 
-        self._save_action = QAction('Save')
+        self._save_action = QAction('Save...')
         self._save_action.triggered.connect(self._saveHistory)
         self._save_action.setShortcut(QKeySequence.Save)
         self.addAction(self._save_action)
@@ -133,6 +133,7 @@ class HistoryListView(QListView):
         self._copy_submenu.addAction(self._copy_equations_action)
         self._copy_submenu.addAction(self._copy_expressions_action)
         self._copy_submenu.addAction(self._copy_results_action)
+
         self._context_menu.addAction(self._cut_equations_action)
         self._context_menu.addAction(self._delete_action)
         self._context_menu.addSeparator()
