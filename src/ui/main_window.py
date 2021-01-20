@@ -20,7 +20,7 @@ class MainWindow(QSplitter):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
-        self.setWindowTitle('Calculator')
+        self.setWindowTitle('Yak')
         self.setWindowIcon(QIcon(os.path.dirname(__file__) + "/resource/main.ico"))
         self.setMinimumSize(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT)
         self.resize(450, 300)
