@@ -10,7 +10,7 @@ from src.history import HistoryListModel, HistoryListView
 from src.history import ExpressionRole
 from .button import Button
 from .expression_field import ExpressionField
-
+from .utils import getResourcePath
 
 MINIMUM_WINDOW_WIDTH = 80
 MINIMUM_WINDOW_HEIGHT = 175
@@ -21,7 +21,7 @@ class MainWindow(QSplitter):
         super(MainWindow, self).__init__()
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         self.setWindowTitle('Yak')
-        self.setWindowIcon(QIcon(os.path.dirname(__file__) + "/resource/main.ico"))
+        self.setWindowIcon(QIcon(getResourcePath('main.ico')))
         self.setMinimumSize(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT)
         self.resize(450, 300)
 
