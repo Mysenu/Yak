@@ -1,9 +1,10 @@
-from PyQt5.QtCore import Qt, QModelIndex, QPoint
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtCore import Qt, QModelIndex, QPoint, QAbstractItemModel
+from PyQt5.QtGui import QKeySequence, QPainter, QPaintEvent, QFont
 from PyQt5.QtWidgets import QListView, QAbstractItemView, QApplication, QMenu, QMessageBox, QAction
 
-from .model import ResultRole, ExpressionRole
+from src.core.utils import fitTextToWidth
 from src.expression import toEditableExpr
+from .model import ResultRole, ExpressionRole
 
 
 class HistoryListView(QListView):
@@ -12,6 +13,7 @@ class HistoryListView(QListView):
 
         self.setMovement(QListView.Snap)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.setTextElideMode(Qt.ElideNone)
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showContextMenu)
@@ -179,3 +181,30 @@ class HistoryListView(QListView):
         self._updateContextMenu()
 
         self._context_menu.exec_(self.mapToGlobal(local_pos))
+
+    def setFont(self, font: QFont) -> None:
+        if model := self.model():
+            model.setFont(font)
+        else:
+            super().setFont(font)
+
+        self.updateEditorGeometries()
+
+    def setModel(self, model: QAbstractItemModel) -> None:
+        super().setModel(model)
+        model.setFont(self.font())
+
+    def paintEvent(self, event: QPaintEvent) -> None:
+        super().paintEvent(event)
+
+        placeholder_text = 'No history'
+
+        p = QPainter(self.viewport())
+        p.setPen(self.palette().placeholderText().color())
+        p.setFont(fitTextToWidth(placeholder_text, self.font(), self.width() - 20))
+
+        if not self.model():
+            return
+
+        if self.model().rowCount(QModelIndex()) <= 0:
+            p.drawText(self.rect(), Qt.AlignCenter, placeholder_text)

@@ -1,15 +1,14 @@
-from typing import List, Optional
 from pathlib import Path
+from typing import List
 
 from PyQt5.QtCore import QStandardPaths
-
 
 CACHE_DIR = Path(QStandardPaths.writableLocation(QStandardPaths.CacheLocation))
 CACHE_FILE = CACHE_DIR / 'calc'
 
 
 def saveHistoryToFile(expressions: List[str], file_path: str) -> None:
-    with open(file_path, 'w') as file:
+    with open(file_path, 'w', encoding='utf-8') as file:
         file.write('\n'.join(expressions))
 
 
@@ -20,10 +19,10 @@ def addExpressionToHistoryCache(expression: str) -> None:
         exit(1)
 
     if CACHE_FILE.exists() and (CACHE_FILE.stat().st_size > 0):
-        with open(CACHE_FILE, 'a') as file:
+        with open(CACHE_FILE, 'a', encoding='utf-8') as file:
             file.write('\n' + expression)
     else:
-        with open(CACHE_FILE, 'w') as file:
+        with open(CACHE_FILE, 'w', encoding='utf-8') as file:
             file.write(expression)
 
 
@@ -38,4 +37,4 @@ def loadHistoryFromCache() -> List[str]:
 
 def clearHistoryCache() -> None:
     if CACHE_FILE.exists():
-        open(CACHE_FILE, 'w').close()
+        open(CACHE_FILE, 'w', encoding='utf-8').close()

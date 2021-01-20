@@ -1,6 +1,7 @@
 import typing
 
 from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QMimeData
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFileDialog
 
 from src.expression import calculateExpr, isValidExpression, toEditableExpr, fromEditableExpr
@@ -15,8 +16,12 @@ class HistoryListModel(QAbstractListModel):
         super(HistoryListModel, self).__init__(parent)
 
         self._expressions = []
+        self._font = None
 
         self.need_clear_history = True
+
+    def setFont(self, font: QFont) -> None:
+        self._font = font
 
     def addExpression(self, expr: str, index: int = 0, save_to_cache: bool = True) -> None:
         if not isValidExpression(expr):
@@ -57,6 +62,8 @@ class HistoryListModel(QAbstractListModel):
 
         if role == Qt.DisplayRole:
             return f'{expression} = {calculateExpr(expression)}'
+        elif role == Qt.FontRole:
+            return self._font
         elif role == Qt.EditRole:
             return expression
         elif role == ExpressionRole:
