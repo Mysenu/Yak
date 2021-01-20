@@ -22,8 +22,8 @@ class MainWindow(QSplitter):
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         self.setWindowTitle('Calculator')
         self.setWindowIcon(QIcon(os.path.dirname(__file__) + "/resource/main.ico"))
-        self.resize(450, 300)
         self.setMinimumSize(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT)
+        self.resize(450, 300)
 
         font = self.font()
         font.setFamily('Consolas')
@@ -38,9 +38,8 @@ class MainWindow(QSplitter):
         self.addWidget(calc_widget)
 
         calc_layout = QVBoxLayout(calc_widget)
-        calc_layout.setContentsMargins(4, 4, 4, 4)
-        calc_layout.setSpacing(4)
-        calc_widget.setMinimumSize(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT)
+        calc_layout.setContentsMargins(0, 0, 0, 0)
+        calc_layout.setSpacing(2)
         calc_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         # Поле ввода
@@ -136,7 +135,7 @@ class MainWindow(QSplitter):
 
         self.history_list_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.setHandleWidth(1)
+        self.setHandleWidth(3)
         self.setStretchFactor(0, 5)
         self.setStretchFactor(1, 5)
 
