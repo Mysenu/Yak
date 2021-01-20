@@ -51,8 +51,9 @@ class MainWindow(QSplitter):
         action_layout = QGridLayout()
         calc_layout.addLayout(action_layout)
 
-        self.clean_entry_button = Button('C', self.entry_field.clear)
-        action_layout.addWidget(self.clean_entry_button, 0, 0)
+        self.clear_entry_button = Button('C', self.entry_field.clear)
+        self.clear_entry_button.setObjectName('Clear')
+        action_layout.addWidget(self.clear_entry_button, 0, 0)
 
         self.backspace_button = Button('⌫', self.entry_field.backspace)
         action_layout.addWidget(self.backspace_button, 0, 1)
@@ -124,6 +125,7 @@ class MainWindow(QSplitter):
 
         self.result_button = Button('=', self._onEvalButtonClick)
         action_layout.addWidget(self.result_button, 5, 3)
+        self.result_button.setObjectName('Result')
 
         # История
         self.history_list_model = HistoryListModel()

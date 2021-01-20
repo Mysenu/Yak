@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QMessageBox
 
 from src.history.utils import loadHistoryFromCache, clearHistoryCache, CACHE_FILE
 from src.ui import MainWindow
+from src.ui.utils import getResourcePath
 
 
 class Application(QApplication):
@@ -14,6 +15,9 @@ class Application(QApplication):
 
         if (CACHE_FILE.exists() and (CACHE_FILE.stat().st_size > 0)) and self.needToRestoreHistory():
             self.addHistoryCacheToHistory()
+
+        with open(getResourcePath("main.qss"), 'r', encoding='utf-8') as style_sheet:
+            self.setStyleSheet(style_sheet.read())
             
         self.main_window.show()
 
