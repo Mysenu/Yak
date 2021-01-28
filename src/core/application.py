@@ -16,9 +16,9 @@ class Application(QApplication):
         if (CACHE_FILE.exists() and (CACHE_FILE.stat().st_size > 0)) and self.needToRestoreHistory():
             self.addHistoryCacheToHistory()
 
-        with open(getResourcePath("main.qss"), 'r', encoding='utf-8') as style_sheet:
-            self.setStyleSheet(style_sheet.read())
-            
+        with open(getResourcePath("main.qss"), 'r', encoding='utf-8') as file_with_style_sheet:
+            self.setStyleSheet(file_with_style_sheet.read())
+
         self.main_window.show()
 
     def needToRestoreHistory(self) -> bool:
