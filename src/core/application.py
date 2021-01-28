@@ -2,9 +2,9 @@ from typing import List, Optional
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
 
-from src.history.utils import loadHistoryFromCache, clearHistoryCache, CACHE_FILE
+from src.core.utils import getResourcePath
 from src.ui import MainWindow
-from src.ui.utils import getResourcePath
+from src.ui.history import loadHistoryFromCache, CACHE_FILE
 
 
 class Application(QApplication):
