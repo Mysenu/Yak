@@ -1,16 +1,13 @@
-import os
-
-from PyQt5 import QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, qApp, QSizePolicy, QGridLayout, QSplitter
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, qApp, QSizePolicy, QGridLayout, QSplitter
 
 from src.expression import calculateExpr
-from src.history import HistoryListModel, HistoryListView
-from src.history import ExpressionRole
+from src.ui.history import HistoryListModel, HistoryListView
+from src.ui.history import ExpressionRole
 from .button import Button
 from .expression_field import ExpressionField
-from .utils import getResourcePath
+from src.core.utils import getResourcePath
 
 MINIMUM_WINDOW_WIDTH = 80
 MINIMUM_WINDOW_HEIGHT = 175
