@@ -185,7 +185,7 @@ class MainWindow(QSplitter):
 
         self.entry_field.setFixedHeight(int(self.height() * 0.13))  # 50 / 380 (entry_field.height / MainWindow.height)
         font = self.font()
-        font.setPointSize(self.height() * 0.13 * 0.4)
+        font.setPointSizeF(self.height() * 0.13 * 0.4)
         self.history_list_view.setFont(font)
 
         minimum_window_size_to_change = MINIMUM_WINDOW_WIDTH * 4  # Twice the size of the minimum window size
