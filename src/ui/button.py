@@ -2,7 +2,7 @@ from typing import Callable
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QResizeEvent
-from PyQt5.QtWidgets import QPushButton, QSizePolicy, QApplication, QWidget, QVBoxLayout, QSlider
+from PyQt5.QtWidgets import QPushButton, QSizePolicy
 
 
 class Button(QPushButton):
