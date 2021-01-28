@@ -13,7 +13,7 @@ class Application(QApplication):
 
         self.main_window = MainWindow()
 
-        if (CACHE_FILE.exists() and (CACHE_FILE.stat().st_size > 0)) and self.needToRestoreHistory():
+        if self.needToRestoreHistory():
             self.addHistoryCacheToHistory()
 
         with open(getResourcePath("main.qss"), 'r', encoding='utf-8') as file_with_style_sheet:
@@ -22,8 +22,9 @@ class Application(QApplication):
         self.main_window.show()
 
     def needToRestoreHistory(self) -> bool:
-        answer = QMessageBox.question(self.main_window, 'Restore history', 'Restore calculation history?')
-        return answer == QMessageBox.Yes
+        if CACHE_FILE.exists() and (CACHE_FILE.stat().st_size > 0):
+            answer = QMessageBox.question(self.main_window, 'Restore history', 'Restore calculation history?')
+            return answer == QMessageBox.Yes
 
     def addHistoryCacheToHistory(self) -> None:
         expressions = loadHistoryFromCache()
