@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt, QModelIndex, QPoint, QAbstractItemModel
-from PyQt5.QtGui import QKeySequence, QPainter, QPaintEvent, QFont
+from PyQt5.QtGui import QKeySequence, QPainter, QPaintEvent, QFont, QResizeEvent
 from PyQt5.QtWidgets import QListView, QAbstractItemView, QApplication, QMenu, QMessageBox, QAction
 
 from src.core.utils import fitTextToWidth
@@ -193,6 +193,13 @@ class HistoryListView(QListView):
     def setModel(self, model: QAbstractItemModel) -> None:
         super().setModel(model)
         model.setFont(self.font())
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+
+        font = self.font()
+        font.setPointSizeF(self.height() * 0.13 * 0.4)
+        self.setFont(font)
 
     def paintEvent(self, event: QPaintEvent) -> None:
         super().paintEvent(event)
