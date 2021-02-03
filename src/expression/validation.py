@@ -11,7 +11,10 @@ class OperandPart(IntEnum):
 
 
 def isValidExpression(expr: str) -> bool:
-    expr = expr.strip()
+    try:
+        expr = expr.strip()
+    except AttributeError:
+        return False
 
     if not expr:
         return False
