@@ -22,9 +22,11 @@ class Application(QApplication):
         self.main_window.show()
 
     def needToRestoreHistory(self) -> bool:
-        if CACHE_FILE.exists() and (CACHE_FILE.stat().st_size > 0):
-            answer = QMessageBox.question(self.main_window, 'Restore history', 'Restore calculation history?')
-            return answer == QMessageBox.Yes
+        if not CACHE_FILE.exists() or (CACHE_FILE.stat().st_size <= 0):
+            return False
+
+        answer = QMessageBox.question(self.main_window, 'Restore history', 'Restore calculation history?')
+        return answer == QMessageBox.Yes
 
     def addHistoryCacheToHistory(self) -> None:
         expressions = loadHistoryFromCache()
