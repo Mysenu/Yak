@@ -182,18 +182,6 @@ class HistoryListView(QListView):
 
         self._context_menu.exec_(self.mapToGlobal(local_pos))
 
-    def setFont(self, font: QFont) -> None:
-        if model := self.model():
-            model.setFont(font)
-        else:
-            super().setFont(font)
-
-        self.updateEditorGeometries()
-
-    def setModel(self, model: QAbstractItemModel) -> None:
-        super().setModel(model)
-        model.setFont(self.font())
-
     def resizeEvent(self, event: QResizeEvent) -> None:
         super().resizeEvent(event)
 

@@ -20,11 +20,6 @@ class HistoryListModel(QAbstractListModel):
 
         self.need_clear_history = True
 
-    def setFont(self, font: QFont) -> None:
-        self.beginResetModel()
-        self._font = font
-        self.endResetModel()
-
     def addExpression(self, expr: str, index: int = 0, save_to_cache: bool = True) -> None:
         if not isValidExpression(expr):
             return
