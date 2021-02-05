@@ -147,14 +147,18 @@ class HistoryListModel(QAbstractListModel):
         if not self.canDropMimeData(data, action, row, column, parent):
             return False
 
-        if row < 0:
-            row = self.rowCount(QModelIndex())
-            self.insertRow(row, QModelIndex())
-        else:
-            self.insertRow(row, QModelIndex())
+        data = data.text().split('\n')
 
-        index = self.index(row, 0, QModelIndex())
-        text = fromEditableExpr(data.text().lower())
-        self.setData(index, text, Qt.EditRole)
+        for value in data:
+            if row < 0:
+                row = self.rowCount(QModelIndex())
+                self.insertRow(row, QModelIndex())
+            else:
+                self.insertRow(row, QModelIndex())
+
+            index = self.index(row, 0, QModelIndex())
+            text = fromEditableExpr(value.lower())
+            self.setData(index, text, Qt.EditRole)
+            row += 1
 
         return True
