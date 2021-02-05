@@ -18,6 +18,8 @@ class HistoryListView(QListView):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showContextMenu)
 
+        self.setObjectName('History')
+
         # Menus
         self._context_menu = None
         self._copy_submenu = None
@@ -186,7 +188,8 @@ class HistoryListView(QListView):
         super().resizeEvent(event)
 
         font = self.font()
-        font.setPointSizeF(self.height() * 0.13 * 0.4)
+        font.setPointSize(self.height() * 0.13 * 0.4)
+        self.viewport().setFont(font)
         self.setFont(font)
 
     def paintEvent(self, event: QPaintEvent) -> None:

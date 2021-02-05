@@ -17,6 +17,8 @@ class ExpressionField(QLineEdit):
         self.setTextMargins(margins)
         self.textChanged.connect(self._autoFormat)
 
+        self.setObjectName('ExpressionField')
+
     def _autoFormat(self, expr: str):
         self.blockSignals(True)
         expr_length = len(expr)

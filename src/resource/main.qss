@@ -3,34 +3,56 @@ QSplitter {
 }
 
 QSplitter::handle {
-	background: #3a4e6b;
-	margin-left: 2px;
-	margin-right: 2px;
+    background: #3a4e6b;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 QListView {
-	background: transparent;
-	border: 0px;
-	color: rgb(220, 220, 220);
+    background: #2b323f;
+    border: 0px;
+    color: rgb(220, 220, 220);
 }
 
-QLineEdit {
-	background: transparent;
-	border-width: 0px;
+QListView::item:selected {
+    background: #242a35;
+}
+
+QLineEdit#ExpressionField {
+    background: transparent;
+    border-width: 0px;
     border-style: solid;
     border-color: #76c2af;
     color: rgb(220, 220, 220);
 }
 
+QListView#History QLineEdit {
+    background: #242a35;
+    color: rgb(220, 220, 220);
+    border: 0px;
+}
+
+QMenu::item:enabled:selected {
+    background: #2b323f;
+}
+
+QMenu::item:disabled {
+    color: rgb(136, 136, 136);
+}
+
+QMenu::item:selected:pressed {
+    background: #323b4a;
+}
+
 Button {
-	background: #3a4e6b;
-	border-width: 0px;
+    background: #3a4e6b;
+    border-width: 0px;
     border-style: solid;
     color: rgb(220, 220, 220);
 }
 
 Button#Result {
-	background: #e0995e;
+    background: #e0995e;
 }
 
 Button#Clear {
@@ -38,6 +60,6 @@ Button#Clear {
 }
 
 QMenu {
-	background: #3a4e6b;
+    background: #3a4e6b;
     color: rgb(220, 220, 220);
 }
