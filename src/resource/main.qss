@@ -1,3 +1,16 @@
+QMessageBox {
+    background: #2b323f;
+}
+
+QMessageBox QPushButton {
+    background: #3a4e6b;
+    color: rgb(220, 220, 220);
+}
+
+QMessageBox QLabel {
+    color: rgb(220, 220, 220);
+}
+
 QSplitter {
     background: #2b323f;
 }
