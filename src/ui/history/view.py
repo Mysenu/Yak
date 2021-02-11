@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QModelIndex, QPoint, QAbstractItemModel
+from PyQt5.QtCore import Qt, QModelIndex, QPoint, QAbstractItemModel, QSettings
 from PyQt5.QtGui import QKeySequence, QPainter, QPaintEvent, QFont, QResizeEvent
 from PyQt5.QtWidgets import QListView, QAbstractItemView, QApplication, QMenu, QMessageBox, QAction
 
@@ -18,6 +18,8 @@ class HistoryListView(QListView):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showContextMenu)
 
+        self._settings = QSettings('Egor', 'Yak')
+
         self.setObjectName('History')
 
         # Menus
@@ -33,6 +35,7 @@ class HistoryListView(QListView):
         self._delete_action: QAction
         self._clear_action: QAction
         self._save_action: QAction
+        self._dont_show_restore_history: QAction
 
         self._createActions()
 
@@ -74,6 +77,11 @@ class HistoryListView(QListView):
         self._save_action.triggered.connect(self._saveHistory)
         self._save_action.setShortcut(QKeySequence.Save)
         self.addAction(self._save_action)
+
+        self._dont_show_restore_history = QAction('Request to restore history on startup')
+        self._dont_show_restore_history.setCheckable(True)
+        self.statusRestoreHistory()
+        self._dont_show_restore_history.triggered.connect(self._showHistory)
 
     def _deleteSelectedEquations(self) -> None:
         for index in reversed(sorted(self.selectedIndexes(), key=QModelIndex.row)):
@@ -120,6 +128,16 @@ class HistoryListView(QListView):
     def _saveHistory(self) -> None:
         self.model().saveHistory()
 
+    def statusRestoreHistory(self):
+        if self._settings.value('dont_show_again'):
+            self._dont_show_restore_history.setChecked(True)
+
+    def _showHistory(self):
+        if self._dont_show_restore_history.isChecked():
+            self._settings.setValue('dont_show_again', 1)
+        else:
+            self._settings.setValue('dont_show_again', 0)
+
     def _askUserToClear(self) -> bool:
         button = QMessageBox.question(self, 'Clear', 'Clear all history?')
         return button == QMessageBox.Yes
@@ -143,6 +161,8 @@ class HistoryListView(QListView):
         self._context_menu.addSeparator()
         self._context_menu.addAction(self._clear_action)
         self._context_menu.addAction(self._save_action)
+        self._context_menu.addSeparator()
+        self._context_menu.addAction(self._dont_show_restore_history)
 
     def _setActionsEnabled(self, enable: bool = True) -> None:
         self._copy_submenu.setEnabled(enable)

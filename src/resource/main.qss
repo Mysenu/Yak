@@ -11,6 +11,10 @@ QMessageBox QLabel {
     color: rgb(220, 220, 220);
 }
 
+QMessageBox QCheckBox {
+    color: rgb(220, 220, 220);
+}
+
 QSplitter {
     background: #2b323f;
 }
