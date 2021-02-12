@@ -49,6 +49,14 @@ QListView#History QLineEdit {
     border: 0px;
 }
 
+QMenu {
+    background: #3a4e6b;
+    color: rgb(220, 220, 220);
+    border-width: 1px;
+    border-style: solid;
+    border-color: #2b323f;
+}
+
 QMenu::item:enabled:selected {
     background: #2b323f;
 }
@@ -74,9 +82,4 @@ Button#Result {
 
 Button#Clear {
     background: #e05e5e;
-}
-
-QMenu {
-    background: #3a4e6b;
-    color: rgb(220, 220, 220);
 }
