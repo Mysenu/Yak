@@ -28,18 +28,18 @@ class Application(QApplication):
         if not CACHE_FILE.exists() or (CACHE_FILE.stat().st_size <= 0):
             return False
 
-        dont_show_checkbox = QCheckBox('Don`t show request restore history')
+        dont_show_request_restore_history_checkbox = QCheckBox('Don`t show request restore history')
 
         message = QMessageBox(self.main_window)
         message.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         message.setWindowTitle('Restore history')
         message.setText('Restore calculation history?')
-        message.setCheckBox(dont_show_checkbox)
+        message.setCheckBox(dont_show_request_restore_history_checkbox)
         message.setIcon(QMessageBox.Question)
 
         answer = message.exec()
 
-        if dont_show_checkbox.checkState() == Qt.Checked:
+        if dont_show_request_restore_history_checkbox.checkState() == Qt.Checked:
             self._settings.setValue('show_request_restore_history', 0)
 
         return answer == QMessageBox.Yes
