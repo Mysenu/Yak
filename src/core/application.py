@@ -19,8 +19,10 @@ class Application(QApplication):
         with open(getResourcePath("main.qss"), 'r', encoding='utf-8') as file_with_style_sheet:
             self.setStyleSheet(file_with_style_sheet.read())
 
-        if (self._settings.value('show_request_restore_history') and self.needToRestoreHistory()) \
-                or self._settings.value('restore_history'):
+        if self._settings.value('show_request_restore_history'):
+            if self.needToRestoreHistory():
+                self.addHistoryCacheToHistory()
+        elif self._settings.value('restore_history'):
             self.addHistoryCacheToHistory()
 
         self.main_window.show()
