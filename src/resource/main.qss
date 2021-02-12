@@ -1,20 +1,3 @@
-QMessageBox {
-    background: #2b323f;
-}
-
-QMessageBox QPushButton {
-    background: #3a4e6b;
-    color: rgb(220, 220, 220);
-}
-
-QMessageBox QLabel {
-    color: rgb(220, 220, 220);
-}
-
-QMessageBox QCheckBox {
-    color: rgb(220, 220, 220);
-}
-
 QSplitter {
     background: #2b323f;
 }
@@ -49,6 +32,56 @@ QListView#History QLineEdit {
     border: 0px;
 }
 
+QMessageBox {
+    background: #2b323f;
+}
+
+QMessageBox QPushButton {
+    background: #3a4e6b;
+    color: rgb(220, 220, 220);
+}
+
+QMessageBox QLabel {
+    color: rgb(220, 220, 220);
+}
+
+QMessageBox QCheckBox {
+    color: rgb(220, 220, 220);
+}
+
+Button {
+    background: #3a4e6b;
+    border-width: 0px;
+    border-style: solid;
+    color: rgb(220, 220, 220);
+}
+
+Button:pressed {
+    background: #4e6991;
+}
+
+Button:hover {
+    border-width: 1px;
+    border-style: groove;
+    border-color: #4e6991;
+}
+
+Button#Result {
+    background: #e0995e;
+}
+
+Button#Result:pressed {
+    background: #ffae6b;
+}
+
+Button#Clear {
+    background: #e05e5e;
+}
+
+Button#Clear:pressed {
+    background: #ff6b6b;
+}
+
 QMenu {
     background: #3a4e6b;
     color: rgb(220, 220, 220);
@@ -67,19 +100,4 @@ QMenu::item:disabled {
 
 QMenu::item:selected:pressed {
     background: #323b4a;
-}
-
-Button {
-    background: #3a4e6b;
-    border-width: 0px;
-    border-style: solid;
-    color: rgb(220, 220, 220);
-}
-
-Button#Result {
-    background: #e0995e;
-}
-
-Button#Clear {
-    background: #e05e5e;
 }
