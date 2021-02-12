@@ -35,7 +35,7 @@ class HistoryListView(QListView):
         self._delete_action: QAction
         self._clear_action: QAction
         self._save_action: QAction
-        self._dont_show_restore_history: QAction
+        self._request_restore_history_action: QAction
 
         self._createActions()
 
@@ -78,10 +78,10 @@ class HistoryListView(QListView):
         self._save_action.setShortcut(QKeySequence.Save)
         self.addAction(self._save_action)
 
-        self._dont_show_restore_history = QAction('Request to restore history on startup')
-        self._dont_show_restore_history.setCheckable(True)
-        self.statusRestoreHistory()
-        self._dont_show_restore_history.triggered.connect(self._showHistory)
+        self._request_restore_history_action = QAction('Request to restore history on startup')
+        self._request_restore_history_action.setCheckable(True)
+        self._request_restore_history_action.triggered.connect(self._changeStateRequestRestoreHistoryAction)
+        self.updateRequestRestoreHistoryAction()
 
     def _deleteSelectedEquations(self) -> None:
         for index in reversed(sorted(self.selectedIndexes(), key=QModelIndex.row)):
@@ -128,15 +128,14 @@ class HistoryListView(QListView):
     def _saveHistory(self) -> None:
         self.model().saveHistory()
 
-    def statusRestoreHistory(self):
-        if self._settings.value('dont_show_again'):
-            self._dont_show_restore_history.setChecked(True)
+    def updateRequestRestoreHistoryAction(self) -> None:
+        if self._settings.value('show_request_restore_history'):
+            self._request_restore_history_action.blockSignals(True)
+            self._request_restore_history_action.setChecked(True)
+            self._request_restore_history_action.blockSignals(False)
 
-    def _showHistory(self):
-        if self._dont_show_restore_history.isChecked():
-            self._settings.setValue('dont_show_again', 1)
-        else:
-            self._settings.setValue('dont_show_again', 0)
+    def _changeStateRequestRestoreHistoryAction(self) -> None:
+        self._settings.setValue('show_request_restore_history', self._request_restore_history_action.isChecked())
 
     def _askUserToClear(self) -> bool:
         button = QMessageBox.question(self, 'Clear', 'Clear all history?')
@@ -162,7 +161,7 @@ class HistoryListView(QListView):
         self._context_menu.addAction(self._clear_action)
         self._context_menu.addAction(self._save_action)
         self._context_menu.addSeparator()
-        self._context_menu.addAction(self._dont_show_restore_history)
+        self._context_menu.addAction(self._request_restore_history_action)
 
     def _setActionsEnabled(self, enable: bool = True) -> None:
         self._copy_submenu.setEnabled(enable)
@@ -195,6 +194,8 @@ class HistoryListView(QListView):
 
             self._clear_action.setEnabled(True)
             self._save_action.setEnabled(True)
+
+        self.updateRequestRestoreHistoryAction()
 
     def showContextMenu(self, local_pos: QPoint) -> None:
         if not self._context_menu:

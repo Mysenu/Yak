@@ -4,7 +4,7 @@ from typing import List
 from PyQt5.QtCore import QStandardPaths
 
 CACHE_DIR = Path(QStandardPaths.writableLocation(QStandardPaths.CacheLocation))
-CACHE_FILE = CACHE_DIR / 'calc'
+CACHE_FILE = CACHE_DIR / 'history'
 
 
 def saveHistoryToFile(expressions: List[str], file_path: str) -> None:

@@ -14,12 +14,12 @@ class Application(QApplication):
 
         self.main_window = MainWindow()
 
-        self._setting = QSettings('Egor', 'YAK')
+        self._settings = QSettings('Egor', 'Yak')
 
         with open(getResourcePath("main.qss"), 'r', encoding='utf-8') as file_with_style_sheet:
             self.setStyleSheet(file_with_style_sheet.read())
 
-        if not self._setting.value('dont_show_again') and self.needToRestoreHistory():
+        if self._settings.value('show_request_restore_history') and self.needToRestoreHistory():
             self.addHistoryCacheToHistory()
 
         self.main_window.show()
@@ -28,7 +28,7 @@ class Application(QApplication):
         if not CACHE_FILE.exists() or (CACHE_FILE.stat().st_size <= 0):
             return False
 
-        dont_show_checkbox = QCheckBox('Don`t show again')
+        dont_show_checkbox = QCheckBox('Don`t show request restore history')
 
         message = QMessageBox(self.main_window)
         message.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
@@ -40,8 +40,8 @@ class Application(QApplication):
         answer = message.exec()
 
         if dont_show_checkbox.checkState() == Qt.Checked:
-            self._setting.setValue('dont_show_again', 1)
-            self.main_window.history_list_view.statusRestoreHistory()
+            self._settings.setValue('show_request_restore_history', 0)
+
         return answer == QMessageBox.Yes
 
     def addHistoryCacheToHistory(self) -> None:
