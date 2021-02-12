@@ -19,7 +19,8 @@ class Application(QApplication):
         with open(getResourcePath("main.qss"), 'r', encoding='utf-8') as file_with_style_sheet:
             self.setStyleSheet(file_with_style_sheet.read())
 
-        if self._settings.value('show_request_restore_history') and self.needToRestoreHistory():
+        if (self._settings.value('show_request_restore_history') and self.needToRestoreHistory()) \
+                or self._settings.value('restore_history'):
             self.addHistoryCacheToHistory()
 
         self.main_window.show()
@@ -28,7 +29,7 @@ class Application(QApplication):
         if not CACHE_FILE.exists() or (CACHE_FILE.stat().st_size <= 0):
             return False
 
-        dont_show_request_restore_history_checkbox = QCheckBox('Don`t show request restore history')
+        dont_show_request_restore_history_checkbox = QCheckBox('Remember answer and don`t show again')
 
         message = QMessageBox(self.main_window)
         message.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
@@ -41,6 +42,10 @@ class Application(QApplication):
 
         if dont_show_request_restore_history_checkbox.checkState() == Qt.Checked:
             self._settings.setValue('show_request_restore_history', 0)
+            if answer == QMessageBox.Yes:
+                self._settings.setValue('restore_history', 1)
+            else:
+                self._settings.setValue('restore_history', 0)
 
         return answer == QMessageBox.Yes
 
